@@ -1,62 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ## Table of Contents
-# 
-# SPIE-AAPM Lung CT Challenge dataset
-# 
-# - [Full Preprocessing Tutorial](https://www.kaggle.com/gzuidhof/full-preprocessing-tutorial)
-# - [Candidate Generation and LUNA16 preprocessing](https://www.kaggle.com/arnavkj95/candidate-generation-and-luna16-preprocessing)
-# 
-# [Small introduction to image features extraction](https://github.com/vsmolyakov/cv)
-# 
-# 
-# - [Gaussian blurring](https://github.com/curiale/Medical-Image-Analysis-IPython-Tutorials/blob/master/tutorial_1/tutorial_1_filtering.ipynb)
-# 
-# - [Normalize pixel](https://scikit-image.org/docs/dev/auto_examples/color_exposure/plot_equalize.html#sphx-glr-auto-examples-color-exposure-plot-equalize-py)
-# 
-# - pywavelet
-# [PyWavelets - Wavelet Transforms in Python](https://pywavelets.readthedocs.io/en/latest/)
-# 
-# - fft
-# [Fourier Transform CV2](https://opencv-python-tutroals.readthedocs.io/en/latest/py_tutorials/py_imgproc/py_transforms/py_fourier_transform/py_fourier_transform.html)
-# [Explanation](https://plus.maths.org/content/fourier-transforms-images)
-# 
-# - sift
-# [pysource](https://pysource.com/2018/03/21/feature-detection-sift-surf-obr-opencv-3-4-with-python-3-tutorial-25/)
-# [Image Classification with Python with SIFT Features](https://ianlondon.github.io/blog/how-to-sift-opencv/)
-# - [Bag-of-words model with SIFT descriptors](https://www.kaggle.com/carloskl12/model-with-sift-descriptors/code)
-# 
-# - lbp
-# [skimage](https://scikit-image.org/docs/dev/auto_examples/features_detection/plot_local_binary_pattern.html)
-# 
-# - pca
-# [In Depth: Principal Component Analysis](https://jakevdp.github.io/PythonDataScienceHandbook/05.09-principal-component-analysis.html#PCA-as-Noise-Filtering)
-# [PCA using Python (scikit-learn)](https://towardsdatascience.com/pca-using-python-scikit-learn-e653f8989e60)
-# [Geeksforgeeks: Principal Component Analysis with Python](https://www.geeksforgeeks.org/principal-component-analysis-with-python/)
-# [Kaggle](https://www.kaggle.com/hamishdickson/preprocessing-images-with-dimensionality-reduction)
-# 
-# - classification
-# [Supervised Learning: Classification of Iris Data](https://github.com/curiale/Medical-Image-Analysis-IPython-Tutorials/blob/master/tutorial_4/classification.ipynb)
-# 
-# reference
-# - [DICOM CNN](https://github.com/ben-heil/DICOM-CNN)
-# 
-# ---
-# 
-# ### to-do
-# 1. Plan to perform PCA or LDA to reduce image dimensions.
-# - Now has only experimented on wavelet, will use FFT, LBP and other preprocessing methods.
-# - Nodule segmentation. Deep learning to select nodules that are cancerous.
-# 
-# - Deep learning for classification.
-# 
-# #### current stage
-# * method rotation (no longer deemed suitable)
-# * PCA
-
-# ## Load dependencies <a id='dependencies'></a>
-
 # In[1]:
 
 

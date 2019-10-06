@@ -1,4 +1,8 @@
-from import_data import load_scan, get_pixels_hu
+#%%
+
+from config import patients
+from import_data import load_scan, get_pixels_hu, load_scan_num, load_df
+from preprocessing import plt_img
 
 
 import numpy as np
@@ -6,11 +10,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from skimage import exposure
 
-
-
-
-
-pca = PCA(125)
+#pca = PCA(125)
 # pca = PCA(n_components=125, svd_solver='randomized', whiten=True)
 
 #%%
@@ -35,6 +35,10 @@ plt_img(*data['pixel'][0:3])
 
 # Normalizes the pixel values of the image
 plt_img(exposure.equalize_adapthist(data['pixel'][0]))
+
+
+df_train = load_df('../CalibrationSet_NoduleData.xlsx')
+df_test = load_df('../TestSet_NoduleData_PublicRelease_wTruth.xlsx')
 
 
 data = data.apply(generate_wavelet, axis=1)
