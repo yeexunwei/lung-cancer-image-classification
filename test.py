@@ -10,7 +10,7 @@ from config import patients, DATA_PICKLE
 from import_data import load_scan, get_pixels_hu, load_scan_num
 from image_processing import wavelet_trans, fft_trans
 from image_processing import sift_ext, surf_ext, orb_ext, matcher, lbp_ext
-from preprocessing import plt_img, to_arr, label_ft
+from preprocessing import plt_img, to_arr, label_ft, pca_ft
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -151,8 +151,46 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4)
 print (X_train.shape, y_train.shape)
 print (X_test.shape, y_test.shape)
 
+# test model
+clf = KNeighborsClassifier(n_neighbors=3)
+clf.fit(X_train, y_train)
+
+# ROC AUC
+probs = clf.predict_proba(X_test)
+# keep probabilities for the positive outcome only
+probs = probs[:, 1]
+# calculate AUC
+auc = roc_auc_score(y_test, probs)
+print('AUC: %.3f' % auc)
+# calculate roc curve
+fpr, tpr, thresholds = roc_curve(y_test, probs)
+# plot no skill
+plt.plot([0, 1], [0, 1], linestyle='--')
+# plot the roc curve for the model
+plt.plot(fpr, tpr, marker='.')
+# show the plot
+plt.show()
 
 
+# Standard Scaler
+sc = StandardScaler() 
+msc = MinMaxScaler()
+
+omin = original.min()
+omax = original.max()
+xformed = (original - omin)/(omax - omin)
+
+plt_img(original, xformed, sc_trans(original), msc.fit_transform(original))
+
+
+# PCA
+pca_ft(data.pixel)
+
+
+
+# LDA
+lda = LinearDiscriminantAnalysis(n_components=2)
+X_train_lda = lda.fit_transform(X_train, y)
 
 
 
