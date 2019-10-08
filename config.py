@@ -9,5 +9,9 @@ import os
 
 
 INPUT_FOLDER = '../data/SPIE-AAPM/SPIE-AAPM Lung CT Challenge/'
+
+DATA_PICKLE = "signal_image"
+IMAGE_OUTPUT = '/image_output/'
+
 patients = os.listdir(INPUT_FOLDER)
 patients.sort()

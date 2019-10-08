@@ -70,9 +70,8 @@ def load_scan_num(num, path):
 def load_scan_df(df):
     return load_scan_num(df['z'], df['path'])
 
-#%%
+
 # Load label data
-    
 
 def load_df(file):
     path = INPUT_FOLDER + file
@@ -100,63 +99,21 @@ def load_df(file):
     df.patient_id = df.patient_id.str.lower()
     return df
 
-# train
-def load_train():
-    df_train = pd.read_excel(INPUT_FOLDER + '../CalibrationSet_NoduleData.xlsx', dtype={'Nodule Center x,y Position*': str})
-    df_train.dropna(subset=['Diagnosis'], inplace=True)
-    df_train['Diagnosis'] = np.where(df_train['Diagnosis'].str.contains('benign'), 0, 1)
-    df_train['Diagnosis'] = df_train['Diagnosis'].astype('category')
+def concat_df(df_train, df_test):
+    # Append df_train and df_test
+    table = df_train.append(df_test)
+    table['nodule_number'].fillna('1', inplace=True)
+    table = table[['patient_id', 'nodule_number', 'diagnosis', 'x', 'y', 'z']]
+    table.head(3)
     
-    df_train['x'] = df_train['Nodule Center x,y Position*'].apply(lambda x: x[:-3])
-    df_train['y'] = df_train['Nodule Center x,y Position*'].apply(lambda x: x[-3:])
-    df_train['z'] = df_train['Nodule Center Image'].astype('int')
-    df_train.drop(columns=['Nodule Center x,y Position*'], inplace=True)
-    df_train.drop(columns=['Nodule Center Image'], inplace=True)
+    # Convert patients to df and append data
+    data = pd.DataFrame(patients, columns=['path'])
+    data['patient_id'] = data['path'].str.lower()
+    data = pd.merge(data, table, on='patient_id')
     
-    df_train.rename(columns={'Scan Number':'patient_id',
-                              'Diagnosis':'diagnosis'}, 
-                     inplace=True)
-    df_train.patient_id = df_train.patient_id.str.lower()
-    return df_train
-
-
-# test
-def load_test():
-    df_test = pd.read_excel(INPUT_FOLDER + '../TestSet_NoduleData_PublicRelease_wTruth.xlsx', dtype={'Nodule Center x,y Position*': str})
-    df_test.dropna(subset=['Final Diagnosis'], inplace=True)
-    df_test['Final Diagnosis'] = np.where(df_test['Final Diagnosis'].str.contains('benign', False), 0, 1)
-    df_test['Final Diagnosis'] = df_test['Final Diagnosis'].astype('category')
-    
-    df_test['x'] = df_test['Nodule Center x,y Position*'].apply(lambda x: x[:-3])
-    df_test['x'] = df_test['x'].str.replace(",", "")
-    df_test['y'] = df_test['Nodule Center x,y Position*'].apply(lambda x: x[-3:])
-    df_test['z'] = df_test['Nodule Center Image'].astype('int')
-    df_test.drop(columns=['Nodule Center x,y Position*'], inplace=True)
-    df_test.drop(columns=['Nodule Center Image'], inplace=True)
-    
-    df_test.rename(columns={'Scan Number':'patient_id',
-                            'Nodule Number':'nodule_number',
-                            'Final Diagnosis':'diagnosis'}, 
-                     inplace=True)
-    df_test['nodule_number'] = df_test['nodule_number'].astype('int')
-    df_test.patient_id = df_test.patient_id.str.lower()
-    return df_test
-
-#
-#
-## Append df_train and df_test
-#table = df_train.append(df_test)
-#table['nodule_number'].fillna('1', inplace=True)
-#table = table[['patient_id', 'nodule_number', 'diagnosis', 'x', 'y', 'z']]
-#table.head(3)
-#
-## Convert patients to df and append data
-#data = pd.DataFrame(patients, columns=['path'])
-#data['patient_id'] = data['path'].str.lower()
-#data = pd.merge(data, table, on='patient_id')
-#
-## Load pixel_array for each row
-#data['pixel'] = data.apply(load_scan_df, axis=1)
-## data['pixel_flatten'] = data.pixel.values.reshape(-1)
-## data['pixel_flatten'] = data.pixel.apply(np.ndarray.flatten) #.apply(np.ndarray.tolist)
-## data['pixel_flatten'] = data.pixel_flatten.apply(np.ndarray.tolist)
+    # Load pixel_array for each row
+    data['pixel'] = data.apply(load_scan_df, axis=1)
+    # data['pixel_flatten'] = data.pixel.values.reshape(-1)
+    # data['pixel_flatten'] = data.pixel.apply(np.ndarray.flatten) #.apply(np.ndarray.tolist)
+    # data['pixel_flatten'] = data.pixel_flatten.apply(np.ndarray.tolist)
+    return data
