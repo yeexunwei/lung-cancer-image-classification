@@ -20,6 +20,27 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
 from sklearn.cluster import KMeans
 
-from sklearn.metrics import accuracy_score, precision_score, roc_curve, roc_auc_score
+from sklearn.metrics import accuracy_score, precision_score, roc_curve, roc_auc_score, classification_report
 
+
+# Model
+
+# create all the machine learning models
+models = []
+models.append(('NB', GaussianNB()))
+models.append(('LSVC', LinearSVC()))
+models.append(('SVC', SVC(random_state=9, gamma='scale')))
+# models.append(('LiR', LinearRegression()))
+models.append(('LoR', LogisticRegression(random_state=9, solver='lbfgs')))
+models.append(('SGD', SGDClassifier()))
+models.append(('KNN', KNeighborsClassifier()))
+models.append(('CART', DecisionTreeClassifier(random_state=9)))
+models.append(('RF', RandomForestClassifier(n_estimators=100, random_state=9)))
+models.append(('LDA', LinearDiscriminantAnalysis()))
+models.append(('MLP', MLPClassifier()))
+
+# variables to hold the results and names
+results = []
+names = []
+scoring = "roc_auc"
 
