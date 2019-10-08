@@ -12,49 +12,10 @@ import matplotlib.pyplot as plt
 
 # In[4]:
 
-
-from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split, cross_val_score
-
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import LinearSVC
-from sklearn.svm import SVC
-from sklearn.linear_model import LinearRegression, LogisticRegression, SGDClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.neural_network import MLPClassifier
-from sklearn.cluster import KMeans
-
-from sklearn.metrics import accuracy_score, precision_score, roc_curve, roc_auc_score
-
-
-# In[5]:
-
-
-
-
-
-# ### Encode categorical class labels
-
-# In[13]:
-
-
-X = data['fft']
-X = to_arr(X)
-
-y = data['diagnosis']
-labelencoder = LabelEncoder()
-y = labelencoder.fit_transform(y)
-
-
 # In[14]:
 
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4)
-print (X_train.shape, y_train.shape)
-print (X_test.shape, y_test.shape)
+
 
 
 # In[15]:

@@ -10,7 +10,7 @@ from config import patients, DATA_PICKLE
 from import_data import load_scan, get_pixels_hu, load_scan_num
 from image_processing import wavelet_trans, fft_trans
 from image_processing import sift_ext, surf_ext, orb_ext, matcher, lbp_ext
-from preprocessing import plt_img
+from preprocessing import plt_img, to_arr, label_ft
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -135,3 +135,24 @@ for ax in ax_img:
     ax.axis('off')
     
 fig.savefig('image_output/lbp', format='svg', dpi=1200)
+
+
+
+
+#%%
+
+X = data['fft']
+X = to_arr(X)
+
+y = data['diagnosis']
+y = label_ft(y)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.4)
+print (X_train.shape, y_train.shape)
+print (X_test.shape, y_test.shape)
+
+
+
+
+
+

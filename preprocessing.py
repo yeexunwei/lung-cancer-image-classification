@@ -40,10 +40,15 @@ def to_arr(col):
     arr = np.stack(i.flatten() for i in col)
     return arr
 
-def sc_trans(arr):
+def sc_ft(arr):
     sc = StandardScaler() 
     arr = sc.fit_transform(arr)
     return arr
+
+def label_ft(y):
+    labelencoder = LabelEncoder()
+    y = labelencoder.fit_transform(y)
+    return y
 
 def pca_curve(data):
     pca = PCA().fit(data)
@@ -52,7 +57,7 @@ def pca_curve(data):
     plt.ylabel('cumulative explained variance');
     return
 
-def pca_trans(arr):
+def pca_ft(arr):
 #     arr = np.stack(i.flatten() for i in col)
     
     # finding the best dimensions
