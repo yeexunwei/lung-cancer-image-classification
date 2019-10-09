@@ -23,10 +23,6 @@ y = label_ft(y)
 
 #%% Build model
 
-
-
-
-
 transformation = ['LL','LH','HL','HH','lbp','fft']
 features = ['sift','surf','orb']
 
@@ -35,6 +31,7 @@ all_cols.extend(features)
 
 grid = []
 
+# try with or without mms, pca
 for col in all_cols:
     print(col)
     X = data[col]
@@ -89,15 +86,19 @@ for histo_list in histo_lists:
 
 grid.extend(grid2)
 
+compare = pd.DataFrame()
 compare['feature'] = all_features
-cols = list(compare.columns)
-cols = [cols[-1]] + cols[:-1]
+compare = compare.set_index('feature')
 compare = compare[cols]
 
-compare = compare.set_index('feature')
+# Rearranging
+# cols = list(compare.columns)
+# cols = [cols[-1]] + cols[:-1]
 
 
-compare
+
+
+
 compare.to_csv('compare_pca_auc.csv')
 compare = pd.read_csv('compare_pca.csv')
 
