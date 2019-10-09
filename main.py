@@ -21,7 +21,7 @@ y = data['diagnosis']
 y = label_ft(y)
 
 
-#%% Build model
+# %% Build model
 
 transformation = ['LL','LH','HL','HH','lbp','fft']
 features = ['sift','surf','orb']
@@ -87,7 +87,7 @@ for histo_list in histo_lists:
 grid.extend(grid2)
 
 compare = pd.DataFrame()
-compare['feature'] = all_features
+compare['feature'] = all_cols
 compare = compare.set_index('feature')
 compare = compare[cols]
 
