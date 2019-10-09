@@ -9,10 +9,10 @@ Created on Mon Oct  7 00:05:06 2019
 import matplotlib.pyplot as plt
 import numpy as np
 
-from sklearn.preprocessing import StandardScaler 
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler, RobustScaler
+from sklearn.preprocessing import LabelEncoder
 
 
 def plt_img(*img, save_as=None, titles=None, gray=True, large=False):
@@ -35,6 +35,9 @@ def plt_img(*img, save_as=None, titles=None, gray=True, large=False):
     if save_as:
         plt.savefig('image_output/' + save_as, format='svg', dpi=1200)
     plt.show()
+    return
+
+#     
     
 def to_arr(col):
     arr = np.stack(i.flatten() for i in col)
@@ -45,10 +48,20 @@ def sc_ft(arr):
     arr = sc.fit_transform(arr)
     return arr
 
+def mms_ft(arr):
+    mms = MinMaxScaler()
+    arr = mms.fit_transform(arr)
+    return arr
+
 def label_ft(y):
     labelencoder = LabelEncoder()
     y = labelencoder.fit_transform(y)
     return y
+
+def lda_ft(arr, y):
+    lda = LinearDiscriminantAnalysis(n_components=2)
+    arr = lda.fit_transform(arr, y)
+    return arr, y
 
 def pca_curve(data):
     pca = PCA().fit(data)

@@ -10,16 +10,29 @@ from config import patients, DATA_PICKLE
 from import_data import load_scan, get_pixels_hu, load_scan_num
 from image_processing import wavelet_trans, fft_trans
 from image_processing import sift_ext, surf_ext, orb_ext, matcher, lbp_ext
-from preprocessing import plt_img, to_arr, label_ft, pca_ft
+from preprocessing import plt_img, to_arr, label_ft, pca_ft, sc_ft, mms_ft, lda_ft
 
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.model_selection import train_test_split, cross_val_score
 from skimage import exposure
 from skimage.color import label2rgb
 import cv2
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, recall_score, roc_auc_score, roc_curve
 
-#%%
+
+#%% Load data
+
+data = pd.read_pickle(DATA_PICKLE)
+plt_img(*data['pixel'][0:3])
+
+# Normalizes the pixel values of the image
+plt_img(exposure.equalize_adapthist(data['pixel'][0]))
+
+
+#%% Data for overview
 
 # Example loading of patient 1
 first_patient = load_scan(patients[0])
@@ -33,14 +46,6 @@ original2 = load_scan_num(82, patients[0])
 print('Total number of patients: {}'.format(len(patients)))
 print('First patient: {}'.format(patients[0]))
 print('Total number of slices: {}'.format(len(first_patient)))
-
-#%%
-
-data = pd.read_pickle(DATA_PICKLE)
-plt_img(*data['pixel'][0:3])
-
-# Normalizes the pixel values of the image
-plt_img(exposure.equalize_adapthist(data['pixel'][0]))
 
 #%% Wavelet
 
@@ -139,10 +144,12 @@ fig.savefig('image_output/lbp', format='svg', dpi=1200)
 
 
 
-#%%
 
-X = data['fft']
+#%% Model
+
+X = data['pixel']
 X = to_arr(X)
+X = mms_ft(X)
 
 y = data['diagnosis']
 y = label_ft(y)
@@ -154,6 +161,13 @@ print (X_test.shape, y_test.shape)
 # test model
 clf = KNeighborsClassifier(n_neighbors=3)
 clf.fit(X_train, y_train)
+
+y_pred = clf.predict(X_test)
+print('Accuracy: %.3f' % accuracy_score(y_test, y_pred))
+print('F1 score: %.3f' % f1_score(y_test, y_pred))
+print('Recall: %.3f' % recall_score(y_test, y_pred))
+print('Confusion matrix: ')
+print(confusion_matrix(y_test, y_pred))
 
 # ROC AUC
 probs = clf.predict_proba(X_test)
@@ -172,25 +186,21 @@ plt.plot(fpr, tpr, marker='.')
 plt.show()
 
 
-# Standard Scaler
-sc = StandardScaler() 
-msc = MinMaxScaler()
+#%% Scaling and standardizing data
 
+# Standard Scaler
 omin = original.min()
 omax = original.max()
 xformed = (original - omin)/(omax - omin)
 
-plt_img(original, xformed, sc_trans(original), msc.fit_transform(original))
+plt_img(original, xformed, sc_ft(original), mms_ft(original))
 
 
-# PCA
+#%% PCA
 pca_ft(data.pixel)
 
-
-
 # LDA
-lda = LinearDiscriminantAnalysis(n_components=2)
-X_train_lda = lda.fit_transform(X_train, y)
+lda_ft(X_train, y)
 
 
 

@@ -12,6 +12,7 @@ INPUT_FOLDER = '../data/SPIE-AAPM/SPIE-AAPM Lung CT Challenge/'
 
 DATA_PICKLE = "signal_image"
 IMAGE_OUTPUT = '/image_output/'
+SCORING = ["accuracy_score", "confusion_matrix", "f1_score", "recall_score", "roc_auc_score"]
 
 patients = os.listdir(INPUT_FOLDER)
 patients.sort()

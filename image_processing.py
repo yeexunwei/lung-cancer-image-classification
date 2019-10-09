@@ -12,6 +12,7 @@ import numpy as np
 import cv2
 import pywt
 from skimage.feature import local_binary_pattern
+from sklearn.cluster import KMeans
 
 
 
@@ -89,9 +90,6 @@ def generate_lbp(img):
 
 
 
-
-
-
 def matcher(original, original2, n_matches=80, transformer='sift'):
     img = np.uint8(original)
     img2 = np.uint8(original2)
@@ -122,3 +120,36 @@ def matcher(original, original2, n_matches=80, transformer='sift'):
         matches[:N_MATCHES], img2.copy(), flags=2)
 
     plt_img(match_img, large=True, save_as=transformer, titles=[transformer + ' match'])
+    
+    return
+
+
+
+def generate_bag(data):
+    bag = []
+    for row in data:
+        for i in row:
+            bag.append(i)
+    return bag
+
+def generate_histo(col, bag, local_desc):
+    k = 2 * 10
+    kmeans = KMeans(n_clusters=k).fit(bag)
+    kmeans.verbose = False
+#     sift = cv2.xfeatures2d.SIFT_create()
+
+    histo_list = []
+
+    for img in col:
+        img = np.uint8(img)
+        kp, des = local_desc.detectAndCompute(img, None)
+
+        histo = np.zeros(k)
+        nkp = np.size(kp)
+
+        for d in des:
+            idx = kmeans.predict([d])
+            histo[idx] += 1/nkp # Because we need normalized histograms, I prefere to add 1/nkp directly
+
+        histo_list.append(histo)
+    return histo_list

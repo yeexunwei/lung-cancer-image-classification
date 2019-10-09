@@ -6,6 +6,8 @@ Created on Tue Oct  8 09:27:16 2019
 @author: hsunwei
 """
 
+from config import SCORING
+
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split, cross_val_score
 
@@ -18,7 +20,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
-from sklearn.cluster import KMeans
+
 
 from sklearn.metrics import accuracy_score, precision_score, roc_curve, roc_auc_score, classification_report
 
@@ -42,5 +44,5 @@ models.append(('MLP', MLPClassifier()))
 # variables to hold the results and names
 results = []
 names = []
-scoring = "roc_auc"
+scoring = SCORING
 
