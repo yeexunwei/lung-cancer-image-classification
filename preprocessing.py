@@ -15,14 +15,15 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.preprocessing import LabelEncoder
 
 
+# Plot, save image
 def plt_img(*img, save_as=None, titles=None, gray=True, large=False):
-    
+    # config
     plt.figure(figsize=(3, 3)) if len(img) == 1 else plt.figure(figsize=(10, 3))
-    if large == True:
+    if large:
         plt.figure(figsize=(8,4))
-    
     color_map = plt.cm.gray if gray else plt.cm.viridis
-        
+
+    # subplots, plot
     total = len(img)
     for i in range(total):
         num = int('1' + str(total) + str(i+1))
@@ -30,38 +31,47 @@ def plt_img(*img, save_as=None, titles=None, gray=True, large=False):
         if titles:
             ax.set_title(titles[i])
         ax.imshow(img[i], cmap=color_map)
-        
     plt.tight_layout()
+
+    # save
     if save_as:
         plt.savefig('image_output/' + save_as, format='svg', dpi=1200)
     plt.show()
     return
 
-#     
-    
+
+# Unflatten Series
 def to_arr(col):
     arr = np.stack(i.flatten() for i in col)
     return arr
 
+
+# Standardize data
 def sc_ft(arr):
     sc = StandardScaler() 
     arr = sc.fit_transform(arr)
     return arr
 
+
+# Scale data
 def mms_ft(arr):
     mms = MinMaxScaler()
     arr = mms.fit_transform(arr)
     return arr
 
+
+# Encode y
 def label_ft(y):
     labelencoder = LabelEncoder()
     y = labelencoder.fit_transform(y)
     return y
 
+
 def lda_ft(arr, y):
     lda = LinearDiscriminantAnalysis(n_components=2)
     arr = lda.fit_transform(arr, y)
     return arr, y
+
 
 def pca_curve(data):
     pca = PCA().fit(data)
@@ -70,9 +80,8 @@ def pca_curve(data):
     plt.ylabel('cumulative explained variance');
     return
 
+
 def pca_ft(arr):
-#     arr = np.stack(i.flatten() for i in col)
-    
     # finding the best dimensions
     pca_dims = PCA()
     pca_dims.fit(arr)
