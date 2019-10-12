@@ -6,7 +6,7 @@ Created on Mon Oct  7 15:51:38 2019
 @author: hsunwei
 """
 
-from config import patients, DATA_PICKLE
+from config import patients, DATA_DF
 from import_data import load_scan, get_pixels_hu, load_scan_num
 from image_processing import wavelet_trans, fft_trans
 from image_processing import sift_ext, surf_ext, orb_ext, matcher, lbp_ext
@@ -26,7 +26,7 @@ from sklearn.metrics import accuracy_score, confusion_matrix, f1_score, recall_s
 # %%
 # Load data
 
-data = pd.read_pickle(DATA_PICKLE)
+data = pd.read_pickle(DATA_DF)
 plt_img(*data['pixel'][0:3])
 
 # Normalizes the pixel values of the image

@@ -10,47 +10,39 @@ Created on Mon Oct  7 23:27:49 2019
 # https://github.com/WillKoehrsen/machine-learning-project-walkthrough
 
 
-from config import DATA_PICKLE  # , SCORING
+from config import DATA_DF  # , SCORING
+from import_data import load_df
 from preprocessing import to_arr, mms_ft, pca_ft, label_ft
 from image_processing import generate_bag, generate_histo
-from model import models
+from model import run_model
 
 import numpy as np
 import pandas as pd
 import cv2
 from sklearn.model_selection import cross_val_score
 
-# %% Load data
-data = pd.read_pickle(DATA_PICKLE)
 
-y = data['diagnosis']
-y = label_ft(y)
+# Load data
+data = pd.read_csv(DATA_DF)
+
+#%%
+data.columns
 
 # %% Build model
 
-transformation = ['LL', 'LH', 'HL', 'HH', 'lbp', 'fft']
+cols = ['LL', 'LH', 'HL', 'HH', 'lbp', 'fft']
 features = ['sift', 'surf', 'orb']
 
-all_cols = transformation.copy()
+all_cols = cols.copy()
 all_cols.extend(features)
 
-grid = []
 
 # try with or without mms, pca
-for col in all_cols:
-    print(col)
-    X = data[col]
-    X = to_arr(X)
-    X = mms_ft(X)
-    X = pca_ft(X)
+run_model(data, all_cols)
 
-    feature = {}
 
-    for name, model in models:
-        cv_results = cross_val_score(model, X, y, cv=10, scoring=scoring)
-        feature[name] = cv_results.mean()
 
-    grid.append(col)
+#%%
 
 # Bag-of-words model with SIFT descriptors
 
