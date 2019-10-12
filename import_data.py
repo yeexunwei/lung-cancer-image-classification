@@ -13,6 +13,16 @@ import pandas as pd
 import pydicom
 
 
+def save_df(df, file_name):
+    df.to_pickle(file_name)
+    return
+
+
+def read_df(filename):
+    df = pd.read_pickle(filename)
+    return df
+
+
 # Load the slices in given folder path
 def load_scan(path):
     path = INPUT_FOLDER + path
@@ -122,3 +132,6 @@ def concat_df(df_train, df_test):
     # data['pixel_flatten'] = data.pixel.apply(np.ndarray.flatten) #.apply(np.ndarray.tolist)
     # data['pixel_flatten'] = data.pixel_flatten.apply(np.ndarray.tolist)
     return data
+
+#%%
+

@@ -94,6 +94,7 @@ def generate_lbp(img):
     return lbp_ext(img)
 
 
+# match images using desriptors
 def matcher(original, original2, n_matches=80, transformer='sift'):
     img = np.uint8(original)
     img2 = np.uint8(original2)
@@ -128,6 +129,7 @@ def matcher(original, original2, n_matches=80, transformer='sift'):
     return
 
 
+# generate bag-of-words
 def generate_bag(data):
     bag = []
     for row in data:

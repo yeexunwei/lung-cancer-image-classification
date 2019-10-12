@@ -10,7 +10,7 @@ import os
 
 INPUT_FOLDER = '../data/SPIE-AAPM/SPIE-AAPM Lung CT Challenge/'
 
-DATA_DF = "data_df.csv"
+DATA_DF = "data_df.pickle"
 IMAGE_OUTPUT = '/image_output/'
 SCORING = ["accuracy_score", "confusion_matrix", "f1_score", "recall_score", "roc_auc_score"]
 

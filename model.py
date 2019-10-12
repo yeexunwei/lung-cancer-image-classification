@@ -6,6 +6,7 @@ Created on Tue Oct  8 09:27:16 2019
 @author: hsunwei
 """
 
+
 from config import SCORING
 from preprocessing import to_arr, mms_ft, pca_ft, label_ft
 
@@ -49,10 +50,11 @@ names = []
 scoring = SCORING
 
 
-def run_model(cols, y, mms=False, pca=False):
+def run_model(df, y, mms=False, pca=False):
     result_list = []
-    for col in cols:
-        X = col
+    for col in df.columns:
+        X = df[col]
+        print(X)
         X = to_arr(X)
         if mms:
             X = mms_ft(X)
@@ -67,7 +69,7 @@ def run_model(cols, y, mms=False, pca=False):
         result_list.append(result)
 
 
-def run_(histo_lists, y):
+def run_desc_model(histo_lists, y):
     result_list = []
     for histo_list in histo_lists:
         X = np.array(histo_list)

@@ -6,7 +6,7 @@ Created on Mon Oct  7 15:50:34 2019
 @author: hsunwei
 """
 from config import DATA_DF
-from import_data import load_df, concat_df
+from import_data import load_df, concat_df, save_df
 from image_processing import generate_wavelet, generate_features, generate_lbp, generate_fft
 
 
@@ -18,10 +18,10 @@ data = concat_df(df_train, df_test)
 
 # load features
 data = data.apply(generate_wavelet, axis=1)
-data = data.apply(generate_features, axis=1)
+# data = data.apply(generate_features, axis=1)
 data['lbp'] = data['pixel'].apply(generate_lbp)
 data['fft'] = data['pixel'].apply(generate_fft)
 
 # Save data
 
-data.to_csv(DATA_DF, index=False)
+save_df(data, DATA_DF)
