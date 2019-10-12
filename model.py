@@ -11,8 +11,8 @@ from preprocessing import to_arr, mms_ft, pca_ft, label_ft
 
 
 from sklearn.preprocessing import LabelEncoder
+import numpy as np
 from sklearn.model_selection import train_test_split, cross_validate
-
 from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
@@ -49,28 +49,35 @@ names = []
 scoring = SCORING
 
 
-def run_model(data, all_cols, mms=False, pca=False):
-    y = data['diagnosis']
-    y = label_ft(y)
-
-    for col in all_cols:
-        print(col)
-        X = data[col]
+def run_model(cols, y, mms=False, pca=False):
+    result_list = []
+    for col in cols:
+        X = col
         X = to_arr(X)
         if mms:
             X = mms_ft(X)
         if pca:
             X = pca_ft(X)
 
-        feature = {}
+        result = {}
         for name, model in models:
             cv_results = cross_validate(model, X, y, cv=10, scoring=scoring)
-            feature[name] = cv_results.mean()
+            result[name] = cv_results.mean()
 
-        grid = []
-        grid.append(col)
+        result_list.append(result)
 
-        return grid
 
+def run_(histo_lists, y):
+    result_list = []
+    for histo_list in histo_lists:
+        X = np.array(histo_list)
+
+        result = {}
+        for name, model in models:
+            cv_results = cross_validate(model, X, y, cv=10, scoring=scoring)
+            result[name] = cv_results.mean()
+
+        result_list.append(result)
+    return result_list
 
 #%%

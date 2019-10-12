@@ -136,17 +136,31 @@ def generate_bag(data):
     return bag
 
 
-def generate_histo(col, bag, local_desc):
+# generate feature vector after clustering
+def generate_histo(img_col, ext):
+    # generate bag of words
+    bag = generate_bag(img_col)
+
+    # initialize feature extraction method
+    if ext == 'sift':
+        ext = cv2.xfeatures2d.SIFT_create()
+    elif ext == 'surf':
+        ext = cv2.xfeatures2d.SURF_create()
+    elif ext == 'orb':
+        ext = cv2.ORB_create(nfeatures=1500)
+    else:
+        return
+
+    # clustering
     k = 2 * 10
     kmeans = KMeans(n_clusters=k).fit(bag)
     kmeans.verbose = False
-    #     sift = cv2.xfeatures2d.SIFT_create()
 
+    # generate histogram/feature vector
     histo_list = []
-
-    for img in col:
+    for img in img_col:
         img = np.uint8(img)
-        kp, des = local_desc.detectAndCompute(img, None)
+        kp, des = ext.detectAndCompute(img, None)
 
         histo = np.zeros(k)
         nkp = np.size(kp)
