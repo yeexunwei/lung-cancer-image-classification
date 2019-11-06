@@ -50,6 +50,7 @@ names = []
 scoring = SCORING
 
 
+# run for each attribute in df
 def run_model(df, y, mms=False, pca=False):
     result_list = []
     for col in df.columns:
@@ -69,6 +70,7 @@ def run_model(df, y, mms=False, pca=False):
     return result_list
 
 
+#
 def run_desc_model(histo_lists, y):
     result_list = []
     for histo_list in histo_lists:

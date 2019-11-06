@@ -14,7 +14,7 @@ from importlib import reload
 import model
 reload(model)
 
-from config import DATA_DF
+from config import DATA_DF, Y_LABEL
 from import_data import read_df
 from preprocessing import label_ft
 from image_processing import generate_histo
@@ -22,12 +22,13 @@ from model import run_model, run_desc_model
 import pandas as pd
 
 # Load data
-data = read_df(DATA_DF)
-
-y = data['diagnosis']
+y = pd.read_pickle(Y_LABEL)
 y = label_ft(y)
 
-# %% Build model
+
+#%%
+
+# Build model
 
 cols = ['LL', 'LH', 'HL', 'HH', 'lbp', 'fft']
 features = ['sift', 'surf', 'orb']

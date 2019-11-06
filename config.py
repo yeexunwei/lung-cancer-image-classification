@@ -28,6 +28,7 @@ DTYPE = {
     'malignancy_prob': np.float16,
     'malignancy': np.float16
 }
+Y_LABEL = OUTPUT_FOLDER + 'malignancy.pkl'
 
 # image pixel
 DATA_DF = OUTPUT_FOLDER + "data.pkl"

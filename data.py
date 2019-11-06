@@ -7,11 +7,10 @@ Created on Mon Oct  7 15:50:34 2019
 """
 import pandas as pd
 import os
-from config import DATA_LABEL, DATA_DF, DTYPE
+from config import DATA_LABEL, DATA_DF, DTYPE, Y_LABEL
 from config import WAVELET_DF, WAVELET2_DF, WAVELET3_DF
 from import_data import load_scan_df
 from image_processing import generate_wavelet, generate_features, generate_lbp, generate_fft
-
 
 # %%
 
@@ -27,7 +26,10 @@ try:
 except:
     print(DATA_DF + " does not exists, generating a new one...")
     pixel = data.apply(load_scan_df, axis=1)
+    y = data['malignancy']
     pixel.to_pickle(DATA_DF)
+    y.to_pickle(Y_LABEL)
+
 
 # %%
 
@@ -39,9 +41,10 @@ def wavelet_df(filename, pixel):
         print(filename + " does not exists, generating a new one...")
         wavelet = pd.DataFrame({'pixel': pixel})
         wavelet = wavelet.apply(generate_wavelet, axis=1)
-        wavelet.drop(columns=['pixel'], inplace=True)
-        wavelet.to_pickle(WAVELET_DF)
+        wavelet.drop(['pixel'], inplace=True, axis=1)
+        wavelet.to_pickle(filename)
     return wavelet
+
 
 wavelet = wavelet_df(WAVELET_DF, pixel)
 
@@ -52,8 +55,6 @@ wavelet3 = wavelet_df(WAVELET3_DF, wavelet2['LL'])
 del wavelet2
 del wavelet3
 
-
-
 # if not os.path.isfile(WAVELET_DF):
 #     print(WAVELET_DF + " does not exists, generating a new one...")
 #     wavelet = pd.DataFrame({'pixel':pixel})
@@ -63,8 +64,7 @@ del wavelet3
 #     del wavelet
 
 
-
-#%%
+# %%
 
 #
 # # Load label data
