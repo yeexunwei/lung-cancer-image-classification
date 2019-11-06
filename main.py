@@ -19,7 +19,6 @@ from import_data import read_df
 from preprocessing import label_ft
 from image_processing import generate_histo
 from model import run_model, run_desc_model
-
 import pandas as pd
 
 # Load data

@@ -11,6 +11,10 @@ import numpy as np
 FOLDER = '../lidc_python/'
 INPUT_FOLDER = '../data/LIDC-IDRI/'
 OUTPUT_FOLDER = 'lidc_data/'
+IMAGE_OUTPUT = '/image_output/'
+
+
+# label
 DATA_LABEL = FOLDER + 'malignancy.csv'
 DTYPE = {
     'case': np.int16,
@@ -25,8 +29,16 @@ DTYPE = {
     'malignancy': np.float16
 }
 
-DATA_DF = "data.pickle"
-IMAGE_OUTPUT = '/image_output/'
+# image pixel
+DATA_DF = OUTPUT_FOLDER + "data.pkl"
+
+# image transformation
+WAVELET_DF = OUTPUT_FOLDER + "wavelet.pkl"
+WAVELET2_DF = OUTPUT_FOLDER + "wavelet2.pkl"
+WAVELET3_DF = OUTPUT_FOLDER + "wavelet3.pkl"
+
+
+
 SCORING = ["accuracy", "f1", "precision", "recall", "roc_auc"]
 # SCORING = ["accuracy_score", "confusion_matrix", "f1_score", "recall_score", "roc_auc_score"]
 

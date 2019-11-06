@@ -6,30 +6,85 @@ Created on Mon Oct  7 15:50:34 2019
 @author: hsunwei
 """
 import pandas as pd
-from config import DATA_LABEL, DATA_DF, OUTPUT_FOLDER, DTYPE
+import os
+from config import DATA_LABEL, DATA_DF, DTYPE
+from config import WAVELET_DF, WAVELET2_DF, WAVELET3_DF
 from import_data import load_scan_df
 from image_processing import generate_wavelet, generate_features, generate_lbp, generate_fft
 
-#%%
+
+# %%
 
 # Load label data
 data = pd.read_csv(DATA_LABEL, dtype=DTYPE)
+data = data[(data['malignancy'] == 0) | (data['malignancy'] == 1)]
+
+# %%
 
 # Get pixel
-data['pixel'] = data.apply(load_scan_df, axis=1)
+try:
+    pixel = pd.read_pickle(DATA_DF)
+except:
+    print(DATA_DF + " does not exists, generating a new one...")
+    pixel = data.apply(load_scan_df, axis=1)
+    pixel.to_pickle(DATA_DF)
+
+# %%
+
+# Get wavelets
+def wavelet_df(filename, pixel):
+    try:
+        wavelet = pd.read_pickle(filename)
+    except:
+        print(filename + " does not exists, generating a new one...")
+        wavelet = pd.DataFrame({'pixel': pixel})
+        wavelet = wavelet.apply(generate_wavelet, axis=1)
+        wavelet.drop(columns=['pixel'], inplace=True)
+        wavelet.to_pickle(WAVELET_DF)
+    return wavelet
+
+wavelet = wavelet_df(WAVELET_DF, pixel)
+
+wavelet2 = wavelet_df(WAVELET2_DF, wavelet['LL'])
+del wavelet
+
+wavelet3 = wavelet_df(WAVELET3_DF, wavelet2['LL'])
+del wavelet2
+del wavelet3
+
+
+
+# if not os.path.isfile(WAVELET_DF):
+#     print(WAVELET_DF + " does not exists, generating a new one...")
+#     wavelet = pd.DataFrame({'pixel':pixel})
+#     wavelet = wavelet.apply(generate_wavelet, axis=1)
+#     wavelet.drop(columns=['pixel'], inplace=True)
+#     wavelet.to_pickle(WAVELET_DF)
+#     del wavelet
+
+
 
 #%%
 
-# Load features
-data = data.apply(generate_wavelet, axis=1)
-# data = data.apply(generate_features, axis=1)
-# data['lbp'] = data['pixel'].apply(generate_lbp)
-# data['fft'] = data['pixel'].apply(generate_fft)
+#
+# # Load label data
+# data = pd.read_csv(DATA_LABEL, dtype=DTYPE)
+#
+# # Get pixel
+# data['pixel'] = data.apply(load_scan_df, axis=1)
 
-# Save data
+# %%
 
-# data.to_hdf(OUTPUT_FOLDER + DATA_DF, key='data', mode='w')
-data.to_pickle(OUTPUT_FOLDER + 'wavelet.pickle')
+# # Load features
+# data = data.apply(generate_wavelet, axis=1)
+# # data = data.apply(generate_features, axis=1)
+# # data['lbp'] = data['pixel'].apply(generate_lbp)
+# # data['fft'] = data['pixel'].apply(generate_fft)
+#
+# # Save data
+#
+# # data.to_hdf(OUTPUT_FOLDER + DATA_DF, key='data', mode='w')
+# data.to_pickle(OUTPUT_FOLDER + 'wavelet.pickle')
 
 # SPIEE =====================================================================
 #
@@ -38,5 +93,4 @@ data.to_pickle(OUTPUT_FOLDER + 'wavelet.pickle')
 # df_train = load_df('../CalibrationSet_NoduleData.xlsx')
 # df_test = load_df('../TestSet_NoduleData_PublicRelease_wTruth.xlsx')
 # data = concat_df(df_train, df_test)
-#%%
-
+# %%
