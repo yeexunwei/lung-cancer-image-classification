@@ -35,7 +35,7 @@ models = []
 models.append(('NB', GaussianNB()))
 models.append(('LSVC', LinearSVC()))
 models.append(('SVC', SVC(random_state=9, gamma='scale')))
-models.append(('LiR', LinearRegression()))
+# models.append(('LiR', LinearRegression()))
 models.append(('LoR', LogisticRegression(random_state=9, solver='lbfgs')))
 models.append(('SGD', SGDClassifier()))
 models.append(('KNN', KNeighborsClassifier()))
@@ -54,7 +54,6 @@ def run_model(df, y, mms=False, pca=False):
     result_list = []
     for col in df.columns:
         X = df[col]
-        print(X)
         X = to_arr(X)
         if mms:
             X = mms_ft(X)
@@ -64,9 +63,10 @@ def run_model(df, y, mms=False, pca=False):
         result = {}
         for name, model in models:
             cv_results = cross_validate(model, X, y, cv=10, scoring=scoring)
-            result[name] = cv_results.mean()
+            result[name] = cv_results
 
         result_list.append(result)
+    return result_list
 
 
 def run_desc_model(histo_lists, y):
@@ -77,7 +77,7 @@ def run_desc_model(histo_lists, y):
         result = {}
         for name, model in models:
             cv_results = cross_validate(model, X, y, cv=10, scoring=scoring)
-            result[name] = cv_results.mean()
+            result[name] = cv_results
 
         result_list.append(result)
     return result_list

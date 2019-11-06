@@ -38,7 +38,15 @@ all_cols.extend(features)
 
 # %%
 # build models of attributes
-result_list1 = run_model(data[cols], y)
+
+import model
+reload(model)
+result_list1 = model.run_model(data[cols], y)
+
+#%%
+print(result_list1)
+
+
 
 # %% Bag-of-words model with feature descriptors
 
