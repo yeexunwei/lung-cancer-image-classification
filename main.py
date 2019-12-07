@@ -14,7 +14,7 @@ from importlib import reload
 import model
 reload(model)
 
-from config import DATA_DF, Y_LABEL
+from config import PIXEL_ARRAY, Y_LABEL
 from import_data import read_df
 from preprocessing import label_ft
 from image_processing import generate_histo

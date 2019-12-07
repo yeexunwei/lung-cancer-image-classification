@@ -20,7 +20,7 @@ def output_folder(filename):
 
 
 # label
-DATA_LABEL = FOLDER + 'malignancy.csv'
+DATA_CSV = FOLDER + 'malignancy.csv'
 DTYPE = {
     'case': np.int16,
     'roi': np.int16,
@@ -35,11 +35,11 @@ DTYPE = {
 }
 Y_LABEL = OUTPUT_FOLDER + 'malignancy' + FORMAT
 # image pixel
-DATA_DF = OUTPUT_FOLDER + "data" + FORMAT
+PIXEL_ARRAY = OUTPUT_FOLDER + "pixel" + FORMAT
 
 # image transformation
 # PKL = ['wavelet.pkl', "fft.pkl", "lbp.pkl", "surf.pkl", "sift.pkl", "orb.pkl"]
-LIST = ['ll', 'lh', 'hl', 'hh', "fft", "lbp", "surf", "sift", "orb"]
+FEATURES = ['ll', 'lh', 'hl', 'hh', "fft", "lbp", "surf", "sift", "orb"]
 
 
 

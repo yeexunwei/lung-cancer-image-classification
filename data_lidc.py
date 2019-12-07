@@ -8,16 +8,17 @@ Created on Mon Oct  7 15:50:34 2019
 import numpy as np
 import pandas as pd
 import os
-from config import DATA_LABEL, DATA_DF, DTYPE, Y_LABEL
-from config import LIST, OUTPUT_FOLDER, FORMAT
+from config import DATA_CSV, PIXEL_ARRAY, DTYPE, Y_LABEL
+from config import FEATURES, OUTPUT_FOLDER, FORMAT
 from import_data import load_scan_df
 from image_processing import generate_wavelet, generate_features, generate_lbp, generate_fft
 from image_processing import generate_ll, generate_lh, generate_hl, generate_hh
 from image_processing import generate_sift, generate_surf, generate_orb
 
-PKL = [OUTPUT_FOLDER + item + FORMAT for item in LIST]
-PKL2 = [OUTPUT_FOLDER + item + FORMAT for item in LIST]
-PKL3 = [OUTPUT_FOLDER + item + FORMAT for item in LIST]
+PKL = [OUTPUT_FOLDER + feature + FORMAT for feature in FEATURES]
+PKL2 = [OUTPUT_FOLDER + feature + '2' + FORMAT for feature in FEATURES]
+PKL3 = [OUTPUT_FOLDER + feature + '3' + FORMAT for feature in FEATURES]
+
 
 # Get wavelets
 def generate_series(filename, pixel):
@@ -48,8 +49,8 @@ def generate_series(filename, pixel):
         df = pd.DataFrame({'pixel': pixel})
         df = df.apply(method, axis=1)
         df.drop(['pixel'], inplace=True, axis=1)
-        print(df.info())
-        np.save(filename, df.iloc[:,0])
+        # print(df.info())
+        np.save(filename, df.iloc[:, 0])
         # df.iloc[:,0].to_pickle(filename)
         del df
 
@@ -62,35 +63,41 @@ def generate_series(filename, pixel):
     #     df = df.apply(method, axis=1)
     #     df.drop(['pixel'], inplace=True, axis=1)
     #     df.to_pickle(filename)
-
     return
 
 
 if __name__ == '__main__':
-    # Load label data
-    # data = pd.read_csv(DATA_LABEL, dtype=DTYPE)
-
-    # Get pixel
+    """Get pixel
+    """
     try:
-        pixel = pd.read_pickle(DATA_DF)
-        print(DATA_DF + " success read")
+        pixel = np.load(PIXEL_ARRAY, allow_pickle=True)
+        print(PIXEL_ARRAY + " success read")
     except:
-        print(DATA_DF + " does not exist, generating a new one...")
+        print(PIXEL_ARRAY + " does not exist, generating a new one...")
+        # load label data
+        data = pd.read_csv(DATA_CSV, dtype=DTYPE)
+
         # load pixel according to slice number
         pixel = data.apply(load_scan_df, axis=1)
         y = data['malignancy']
-        pixel.to_pickle(DATA_DF)
-        y.to_pickle(Y_LABEL)
+        np.save(PIXEL_ARRAY, pixel)
+        np.save(Y_LABEL, y)
+        # pixel.to_pickle(PIXEL_ARRAY)
+        # y.to_pickle(Y_LABEL)
 
+    """Generate files
+    """
     for item in PKL:
         generate_series(item, pixel)
 
     del pixel
-    ll1 = pd.read_pickle(OUTPUT_FOLDER + 'll.pkl')
+    ll1 = OUTPUT_FOLDER + 'll' + FORMAT
+    ll1 = np.load(ll1, allow_pickle=True)
     for filename in PKL2:
         generate_series(filename, ll1)
 
     del ll1
-    ll2 = pd.read_pickle(OUTPUT_FOLDER + 'll2.pkl')
+    ll2 = OUTPUT_FOLDER + 'll2' + FORMAT
+    ll2 = np.load(ll2, allow_pickle=True)
     for filename in PKL3:
         generate_series(filename, ll2)
