@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Mon Oct  7 15:50:34 2019
 
@@ -11,7 +9,7 @@ import os
 from config import DATA_CSV, PIXEL_ARRAY, DTYPE, Y_LABEL
 from config import FEATURES, OUTPUT_FOLDER, FORMAT
 from import_data import load_scan_df
-from image_processing import generate_wavelet, generate_features, generate_lbp, generate_fft
+from image_processing import generate_lbp, generate_fft
 from image_processing import generate_ll, generate_lh, generate_hl, generate_hh
 from image_processing import generate_sift, generate_surf, generate_orb
 

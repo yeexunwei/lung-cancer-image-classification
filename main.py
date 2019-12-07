@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Mon Oct  7 23:27:49 2019
 
@@ -15,7 +13,6 @@ import model
 reload(model)
 
 from config import PIXEL_ARRAY, Y_LABEL
-from import_data import read_df
 from preprocessing import label_ft
 from image_processing import generate_histo
 from model import run_model, run_desc_model

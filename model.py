@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Tue Oct  8 09:27:16 2019
 
@@ -23,7 +21,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
-
+from sklearn.model_selection import train_test_split, cross_validate, cross_val_score
 
 from sklearn.metrics import accuracy_score, precision_score, roc_curve, roc_auc_score, classification_report
 
@@ -50,11 +48,11 @@ names = []
 scoring = SCORING
 
 
-# run for each attribute in df
-def run_model(df, y, mms=False, pca=False):
+def run_model(df, y, mms=False, pca=True):
     result_list = []
     for col in df.columns:
         X = df[col]
+        # print(X)
         X = to_arr(X)
         if mms:
             X = mms_ft(X)
@@ -63,14 +61,15 @@ def run_model(df, y, mms=False, pca=False):
 
         result = {}
         for name, model in models:
-            cv_results = cross_validate(model, X, y, cv=10, scoring=scoring)
+            cv_results = cross_val_score(model, X, y, cv=5, scoring="f1")
             result[name] = cv_results
+            # cv_results = cross_validate(model, X, y, cv=10, scoring="accuracy")
+            # result[name] = cv_results
 
         result_list.append(result)
     return result_list
 
 
-#
 def run_desc_model(histo_lists, y):
     result_list = []
     for histo_list in histo_lists:
@@ -78,10 +77,8 @@ def run_desc_model(histo_lists, y):
 
         result = {}
         for name, model in models:
-            cv_results = cross_validate(model, X, y, cv=10, scoring=scoring)
+            cv_results = cross_val_score(model, X, y, cv=5, scoring="f1")
             result[name] = cv_results
 
         result_list.append(result)
     return result_list
-
-#%%

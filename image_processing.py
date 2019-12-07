@@ -1,19 +1,86 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
 Created on Sun Oct  6 22:12:23 2019
 
 @author: hsunwei
 """
-from preprocessing import plt_img
 import numpy as np
 import cv2
 import pywt
 from skimage.feature import local_binary_pattern
 from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt
+from config import IMAGE_OUTPUT
 
 
-# Image transformation
+"""Pixel class
+"""
+
+
+class Pixel:
+    def __init__(self, img):
+        self.img = img
+        self.img_int = np.uint8(self.img)
+
+    def plot(self):
+        plt_img(self.img, save_as='original')
+
+    def wavelet(self):
+        LL, (LH, HL, HH) = wavelet_trans(self.img)
+        titles = [' Horizontal detail', 'Vertical detail', 'Diagonal detail']
+        plt_img(LH, HL, HH, save_as='wavelet', titles=titles)
+
+    def fft(self):
+        magnitude_spectrum = fft_trans(self.img)
+        plt_img(magnitude_spectrum, save_as='fft', titles=['Magnitude Spectrum'])
+
+    def lbp(self):
+        texture = lbp_ext(self.img)
+        plt_img(texture, save_as='lbp', titles=['Texture'])
+
+    def descriptors(self):
+        keypoints_sift, descriptors_sift = sift_ext(self.img)
+        keypoints_surf, descriptors_surf = surf_ext(self.img)
+        keypoints_orb, descriptors_orb = orb_ext(self.img)
+
+        img_int = self.img_int
+
+        plt_img(cv2.drawKeypoints(img_int, keypoints_sift, None, color=(0, 255, 0), flags=0),
+                cv2.drawKeypoints(img_int, keypoints_surf, None, color=(0, 255, 0), flags=0),
+                cv2.drawKeypoints(img_int, keypoints_orb, None, color=(0, 255, 0), flags=0),
+                titles=['SIFT', 'SURF', "ORB"],
+                save_as='local_descriptors'
+                )
+
+
+# Plot, save image
+def plt_img(*img, save_as=None, titles=None, gray=True, large=True):
+    # config
+    plt.figure(figsize=(3, 3)) if len(img) == 1 else plt.figure(figsize=(10, 3))
+    if large:
+        plt.figure(figsize=(8, 4))
+    color_map = plt.cm.gray if gray else plt.cm.viridis
+
+    # subplots, plot
+    total = len(img)
+    for i in range(total):
+        num = int('1' + str(total) + str(i + 1))
+        ax = plt.subplot(num)
+        if titles:
+            ax.set_title(titles[i])
+        ax.imshow(img[i], cmap=color_map)
+    plt.tight_layout()
+
+    # save
+    if save_as:
+        plt.savefig(IMAGE_OUTPUT + save_as, format='svg', dpi=1200)
+    plt.show()
+    return
+
+
+"""Image transformation and extraction
+"""
+
+
 def wavelet_trans(original):
     coeffs2 = pywt.dwt2(original, 'bior1.3')
     LL, (LH, HL, HH) = coeffs2
@@ -60,39 +127,51 @@ def lbp_ext(original):
     return lbp
 
 
-# Generate df
-def generate_wavelet(df, type=None):
+def sift_des(original):
+    keypoints, descriptors = sift_ext(original)
+    return descriptors
+
+
+def surf_des(original):
+    keypoints, descriptors = surf_ext(original)
+    return descriptors
+
+
+def orb_des(original):
+    keypoints, descriptors = orb_ext(original)
+    return descriptors
+
+
+"""Generate df
+"""
+
+
+def generate_wavelet(df):
     LL, (LH, HL, HH) = wavelet_trans(df['pixel'])
-    # if type == "ll":
-    #     df['LL'] = LL
-    # elif type == 'lh':
-    #     df['LH'] = LH
-    # elif type == 'hl':
-    #     df['HL'] = HL
-    # elif type == 'hh':
-    #     df['HH'] = HH
-    # else:
     df['LL'] = LL
     df['LH'] = LH
     df['HL'] = HL
     df['HH'] = HH
-
     return df
+
 
 def generate_ll(df):
     LL, (LH, HL, HH) = wavelet_trans(df['pixel'])
     df['LL'] = LL
     return df
 
+
 def generate_lh(df):
     LL, (LH, HL, HH) = wavelet_trans(df['pixel'])
     df['LH'] = LH
     return df
 
+
 def generate_hl(df):
     LL, (LH, HL, HH) = wavelet_trans(df['pixel'])
     df['HL'] = HL
     return df
+
 
 def generate_hh(df):
     LL, (LH, HL, HH) = wavelet_trans(df['pixel'])
@@ -189,18 +268,27 @@ def generate_bag(data):
 
 # generate feature vector after clustering
 def generate_histo(img_col, ext):
-    # generate bag of words
-    bag = generate_bag(img_col)
-
     # initialize feature extraction method
     if ext == 'sift':
-        ext = cv2.xfeatures2d.SIFT_create()
+        ext = sift_ext
+        desc = sift_des
+
     elif ext == 'surf':
-        ext = cv2.xfeatures2d.SURF_create()
+        ext = surf_ext
+        desc = surf_des
+
     elif ext == 'orb':
-        ext = cv2.ORB_create(nfeatures=1500)
+        ext = orb_ext
+        desc = orb_des
     else:
         return
+
+    # convert to descriptors
+    img_des = img_col.apply(desc)
+
+    # generate bag of words
+    bag = generate_bag(img_des)
+
 
     # clustering
     k = 2 * 10
@@ -211,7 +299,7 @@ def generate_histo(img_col, ext):
     histo_list = []
     for img in img_col:
         img = np.uint8(img)
-        kp, des = ext.detectAndCompute(img, None)
+        kp, des = ext(img)
 
         histo = np.zeros(k)
         nkp = np.size(kp)
