@@ -53,16 +53,6 @@ def generate_series(filename, pixel):
         np.save(filename, df.iloc[:, 0])
         # df.iloc[:,0].to_pickle(filename)
         del df
-
-    # try:
-    #     df = pd.read_pickle(filename)
-    #     print(filename + " exists")
-    # except:
-    #     print(filename + " does not exist, generating a new one...")
-    #     df = pd.DataFrame({'pixel': pixel})
-    #     df = df.apply(method, axis=1)
-    #     df.drop(['pixel'], inplace=True, axis=1)
-    #     df.to_pickle(filename)
     return
 
 
@@ -101,3 +91,11 @@ if __name__ == '__main__':
     ll2 = np.load(ll2, allow_pickle=True)
     for filename in PKL3:
         generate_series(filename, ll2)
+    del ll2
+
+    """Generate histograms
+    """
+    for root, dirs, files in os.walk(OUTPUT_FOLDER):
+        for file in files:
+            if 'sift' in file and file.endswith(FORMAT):
+                print(file[:-4])
