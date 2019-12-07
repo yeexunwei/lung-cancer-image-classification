@@ -8,10 +8,15 @@ Created on Mon Oct  7 00:05:18 2019
 import os
 import numpy as np
 
-FOLDER = '../lidc_python/'
+FOLDER = '../lidc_preprocessing/'
 INPUT_FOLDER = '../data/LIDC-IDRI/'
 OUTPUT_FOLDER = 'lidc_data/'
 IMAGE_OUTPUT = '/image_output/'
+
+FORMAT = ".npy"
+
+def output_folder(filename):
+    return OUTPUT_FOLDER + filename
 
 
 # label
@@ -28,15 +33,27 @@ DTYPE = {
     'malignancy_prob': np.float16,
     'malignancy': np.float16
 }
-Y_LABEL = OUTPUT_FOLDER + 'malignancy.pkl'
-
+Y_LABEL = OUTPUT_FOLDER + 'malignancy' + FORMAT
 # image pixel
-DATA_DF = OUTPUT_FOLDER + "data.pkl"
+DATA_DF = OUTPUT_FOLDER + "data" + FORMAT
 
 # image transformation
-WAVELET_DF = OUTPUT_FOLDER + "wavelet.pkl"
-WAVELET2_DF = OUTPUT_FOLDER + "wavelet2.pkl"
-WAVELET3_DF = OUTPUT_FOLDER + "wavelet3.pkl"
+# PKL = ['wavelet.pkl', "fft.pkl", "lbp.pkl", "surf.pkl", "sift.pkl", "orb.pkl"]
+LIST = ['ll', 'lh', 'hl', 'hh', "fft", "lbp", "surf", "sift", "orb"]
+
+
+
+# WAVELET_PKL = output_folder("wavelet.pkl")
+# WAVELET2_PKL = output_folder("wavelet2.pkl")
+# WAVELET3_PKL = output_folder("wavelet3.pkl")
+# FFT_PKL = output_folder("fft.pkl")
+# LBP_PKL = output_folder("lbp.pkl")
+
+
+# SURF_PKL = output_folder("surf.pkl")
+# SIFT_PKL = output_folder("sift.pkl")
+# ORB_PKL = output_folder("orb.pkl")
+
 
 
 
@@ -45,6 +62,8 @@ SCORING = ["accuracy", "f1", "precision", "recall", "roc_auc"]
 
 patients = os.listdir(INPUT_FOLDER)
 patients.sort()
+
+
 
 # SPIEE =====================================================================
 #

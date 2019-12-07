@@ -7,8 +7,6 @@ Created on Sun Oct  6 22:12:23 2019
 """
 from preprocessing import plt_img
 import numpy as np
-
-# signal processing
 import cv2
 import pywt
 from skimage.feature import local_binary_pattern
@@ -16,7 +14,6 @@ from sklearn.cluster import KMeans
 
 
 # Image transformation
-
 def wavelet_trans(original):
     coeffs2 = pywt.dwt2(original, 'bior1.3')
     LL, (LH, HL, HH) = coeffs2
@@ -31,7 +28,6 @@ def fft_trans(original):
 
 
 # Feature extraction
-
 def sift_ext(original):
     sift = cv2.xfeatures2d.SIFT_create()
 
@@ -65,17 +61,74 @@ def lbp_ext(original):
 
 
 # Generate df
-def generate_wavelet(df):
+def generate_wavelet(df, type=None):
     LL, (LH, HL, HH) = wavelet_trans(df['pixel'])
+    # if type == "ll":
+    #     df['LL'] = LL
+    # elif type == 'lh':
+    #     df['LH'] = LH
+    # elif type == 'hl':
+    #     df['HL'] = HL
+    # elif type == 'hh':
+    #     df['HH'] = HH
+    # else:
     df['LL'] = LL
     df['LH'] = LH
     df['HL'] = HL
     df['HH'] = HH
+
+    return df
+
+def generate_ll(df):
+    LL, (LH, HL, HH) = wavelet_trans(df['pixel'])
+    df['LL'] = LL
+    return df
+
+def generate_lh(df):
+    LL, (LH, HL, HH) = wavelet_trans(df['pixel'])
+    df['LH'] = LH
+    return df
+
+def generate_hl(df):
+    LL, (LH, HL, HH) = wavelet_trans(df['pixel'])
+    df['HL'] = HL
+    return df
+
+def generate_hh(df):
+    LL, (LH, HL, HH) = wavelet_trans(df['pixel'])
+    df['HH'] = HH
     return df
 
 
-def generate_fft(img):
-    return fft_trans(img)
+def generate_fft(df):
+    df['fft'] = fft_trans(df['pixel'])
+    return df
+
+
+def generate_lbp(df):
+    df['lbp'] = lbp_ext(df['pixel'])
+    return df
+
+
+def generate_sift(df):
+    img = np.uint8(df['pixel'])
+    keypoints_sift, descriptors_sift = sift_ext(img)
+    df['sift'] = descriptors_sift
+    return df
+
+
+def generate_surf(df):
+    img = np.uint8(df['pixel'])
+    keypoints_surf, descriptors_surf = surf_ext(img)
+    df['surf'] = descriptors_surf
+    return df
+
+
+def generate_orb(df):
+    img = np.uint8(df['pixel'])
+    keypoints_orb, descriptors_orb = orb_ext(img)
+    df['orb'] = descriptors_orb
+    return df
 
 
 def generate_features(df):
@@ -88,10 +141,6 @@ def generate_features(df):
     df['surf'] = descriptors_surf
     df['orb'] = descriptors_orb
     return df
-
-
-def generate_lbp(img):
-    return lbp_ext(img)
 
 
 # match images using desriptors

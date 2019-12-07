@@ -13,37 +13,33 @@ import pandas as pd
 import pydicom
 
 
-# def save_df(df, file_name):
-#     df.to_pickle(file_name)
-#     return
+def load_scan_df(df):
+    # Load pixels for dataframe
+    return load_scan_num(df['case'], df['slice_no'])
 
 
-def read_df(filename):
-    df = pd.read_pickle(filename)
-    return df
+def load_scan_num(case, slice_no):
+    # Load the specified slice in given folder path and return pixel array
+    path = get_path(case, slice_no)
+    dicom = pydicom.dcmread(path)
+    image_array = get_pixel_hu(dicom)
+    return image_array
 
 
-# Load the slices in given folder path
-def load_scan(path):
-    path = INPUT_FOLDER + path
+def get_path(case, slice_no):
+    # Generate path according to case and slice no
+    case = str(case)
+    slice_no = str(slice_no)
+    case = case.zfill(4)
+    slice_no = slice_no.zfill(4)
 
-    slices = [pydicom.dcmread(s) for s in glob.glob(path + '/*/*/*.dcm')]
-    #     slices = [pydicom.read_file(s) for s in glob.glob(path + '/*/*/*.dcm')]
-    print(slices)
-    slices.sort(key=lambda x: float(x.ImagePositionPatient[2]))
-    try:
-        slice_thickness = np.abs(slices[0].ImagePositionPatient[2] - slices[1].ImagePositionPatient[2])
-    except:
-        slice_thickness = np.abs(slices[0].SliceLocation - slices[1].SliceLocation)
-
-    for s in slices:
-        s.SliceThickness = slice_thickness
-
-    return slices
+    return glob.glob(INPUT_FOLDER + "*" + case + "/*/*/*" + slice_no + ".dcm")[0]
 
 
-def get_pixels_hu(slices):
-    image = np.stack([s.pixel_array for s in slices])
+def get_pixel_hu(dicom):
+    # Pixel to np.array
+
+    image = dicom.pixel_array
     # Convert to int16 (from sometimes int16), 
     # should be possible as values should always be low enough (<32k)
     image = image.astype(np.int16)
@@ -53,40 +49,19 @@ def get_pixels_hu(slices):
     image[image == -2000] = 0
 
     # Convert to Hounsfield units (HU)
-    for slice_number in range(len(slices)):
+    intercept = dicom.RescaleIntercept
+    slope = dicom.RescaleSlope
 
-        intercept = slices[slice_number].RescaleIntercept
-        slope = slices[slice_number].RescaleSlope
+    if slope != 1:
+        image = slope * image.astype(np.float64)
+        image = image.astype(np.int16)
 
-        if slope != 1:
-            image[slice_number] = slope * image[slice_number].astype(np.float64)
-            image[slice_number] = image[slice_number].astype(np.int16)
-
-        image[slice_number] += np.int16(intercept)
+    image += np.int16(intercept)
 
     return np.array(image, dtype=np.int16)
 
 
-# Generate path according to case and slice no
-def get_path(case, slice_no):
-    case = str(case)
-    slice_no = str(slice_no)
-    case = case.zfill(4)
-    slice_no = slice_no.zfill(4)
 
-    return glob.glob(INPUT_FOLDER + "*" + case + "/*/*/*" + slice_no + ".dcm")[0]
-
-
-# Load the specified slice in given folder path
-def load_scan_num(case, slice_no):
-    path = get_path(case, slice_no)
-    slices = pydicom.dcmread(path)
-    return slices.pixel_array
-
-
-# Load pixels for dataframe
-def load_scan_df(df):
-    return load_scan_num(df['case'], df['slice_no'])
 
 # SPIEE =====================================================================
 #
