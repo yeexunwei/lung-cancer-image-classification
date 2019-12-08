@@ -89,8 +89,7 @@ def generate_histogram(des_file):
 
 
 if __name__ == '__main__':
-    """Get pixel
-    """
+    "Get pixel"
     try:
         pixel = np.load(PIXEL_ARRAY, allow_pickle=True)
         print(PIXEL_ARRAY + " success read")
@@ -107,8 +106,7 @@ if __name__ == '__main__':
         # pixel.to_pickle(PIXEL_ARRAY)
         # y.to_pickle(Y_LABEL)
 
-    """Generate files
-    """
+    "Generate files"
     for item in PKL:
         generate_series(item, pixel)
 
@@ -125,8 +123,7 @@ if __name__ == '__main__':
         generate_series(filename, ll2)
     del ll2
 
-    """Generate histograms
-    """
+    "Generate histograms"
     for root, dirs, files in os.walk(OUTPUT_FOLDER):
         for file in files:
             if ('sift' in file or 'surf' in file or 'orb' in file) and file.endswith(FORMAT):
