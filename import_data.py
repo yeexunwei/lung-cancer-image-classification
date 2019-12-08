@@ -11,12 +11,12 @@ import pandas as pd
 import pydicom
 
 
-def load_scan_df(df):
+def scan_to_df(df):
     # Load pixels for dataframe
-    return load_scan_num(df['case'], df['slice_no'])
+    return get_scan_num(df['case'], df['slice_no'])
 
 
-def load_scan_num(case, slice_no):
+def get_scan_num(case, slice_no):
     # Load the specified slice in given folder path and return pixel array
     path = get_path(case, slice_no)
     dicom = pydicom.dcmread(path)

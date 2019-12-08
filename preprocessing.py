@@ -7,43 +7,13 @@ Created on Mon Oct  7 00:05:06 2019
 import matplotlib.pyplot as plt
 import numpy as np
 
-from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.decomposition import PCA
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-from sklearn.preprocessing import LabelEncoder
 
 
 # Unflatten Series
 def to_arr(col):
     arr = np.stack(i.flatten() for i in col)
     return arr
-
-
-# Standardize data
-def sc_ft(arr):
-    sc = StandardScaler() 
-    arr = sc.fit_transform(arr)
-    return arr
-
-
-# Scale data
-def mms_ft(arr):
-    mms = MinMaxScaler()
-    arr = mms.fit_transform(arr)
-    return arr
-
-
-# Encode y
-def label_ft(y):
-    labelencoder = LabelEncoder()
-    y = labelencoder.fit_transform(y)
-    return y
-
-
-def lda_ft(arr, y):
-    lda = LinearDiscriminantAnalysis(n_components=2)
-    arr = lda.fit_transform(arr, y)
-    return arr, y
 
 
 def pca_curve(data):

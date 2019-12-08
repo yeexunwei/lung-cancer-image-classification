@@ -6,19 +6,24 @@ Created on Mon Oct  7 15:50:34 2019
 import numpy as np
 import pandas as pd
 import os
+from sklearn.cluster import KMeans, MiniBatchKMeans
+
 from config import DATA_CSV, PIXEL_ARRAY, DTYPE, Y_LABEL
 from config import FEATURES, OUTPUT_FOLDER, FORMAT
-from import_data import load_scan_df
+from import_data import scan_to_df
 from image_processing import generate_lbp, generate_fft
 from image_processing import generate_ll, generate_lh, generate_hl, generate_hh
 from image_processing import generate_sift, generate_surf, generate_orb
+from image_processing import generate_bag
+
+k = 2 * 10
+batch_size = 45
 
 PKL = [OUTPUT_FOLDER + feature + FORMAT for feature in FEATURES]
 PKL2 = [OUTPUT_FOLDER + feature + '2' + FORMAT for feature in FEATURES]
 PKL3 = [OUTPUT_FOLDER + feature + '3' + FORMAT for feature in FEATURES]
 
 
-# Get wavelets
 def generate_series(filename, pixel):
     if "ll" in filename:
         method = generate_ll
@@ -49,8 +54,37 @@ def generate_series(filename, pixel):
         df.drop(['pixel'], inplace=True, axis=1)
         # print(df.info())
         np.save(filename, df.iloc[:, 0])
-        # df.iloc[:,0].to_pickle(filename)
+        # df.iloc[:,0].to_pickle(des_file)
         del df
+    return
+
+
+def generate_histogram(des_file):
+    filename = OUTPUT_FOLDER + 'histo_' + des_file + FORMAT
+
+    if os.path.isfile(filename) and os.path.getsize(filename) > 0:
+        print(filename + " exists")
+    else:
+        print(filename + " does not exist, generating histograms...")
+        des_series = np.load(OUTPUT_FOLDER + des_file + FORMAT, allow_pickle=True)
+        # bag = np.vstack(np.uint32(i) for i in des_series)
+        bag = generate_bag(des_series)
+
+        mbk = MiniBatchKMeans(n_clusters=k, batch_size=batch_size, n_init=10, max_no_improvement=10, verbose=0)
+        mbk.fit(bag)
+
+        histo_list = []
+        for descriptors in des_series:
+            histo = np.zeros(k)
+            nkp = np.size(descriptors)
+
+            for d in descriptors:
+                idx = mbk.predict([d])
+                histo[idx] += 1 / nkp  # Because we need normalized histograms, I prefere to add 1/nkp directly
+
+            histo_list.append(histo)
+
+        np.save(filename, histo_list)
     return
 
 
@@ -66,8 +100,8 @@ if __name__ == '__main__':
         data = pd.read_csv(DATA_CSV, dtype=DTYPE)
 
         # load pixel according to slice number
-        pixel = data.apply(load_scan_df, axis=1)
-        y = data['malignancy']
+        pixel = data.apply(scan_to_df, axis=1)
+        y = data['malignancy'].astype(int)
         np.save(PIXEL_ARRAY, pixel)
         np.save(Y_LABEL, y)
         # pixel.to_pickle(PIXEL_ARRAY)
@@ -95,5 +129,5 @@ if __name__ == '__main__':
     """
     for root, dirs, files in os.walk(OUTPUT_FOLDER):
         for file in files:
-            if 'sift' in file and file.endswith(FORMAT):
-                print(file[:-4])
+            if ('sift' in file or 'surf' in file or 'orb' in file) and file.endswith(FORMAT):
+                generate_histogram(file[:-4])

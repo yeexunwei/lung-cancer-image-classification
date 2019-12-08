@@ -142,7 +142,7 @@ def orb_des(original):
     return descriptors
 
 
-"""Generate df
+"""Generate dataframe
 """
 
 
@@ -222,91 +222,91 @@ def generate_features(df):
     return df
 
 
-# match images using desriptors
-def matcher(original, original2, n_matches=80, transformer='sift'):
-    img = np.uint8(original)
-    img2 = np.uint8(original2)
-
-    if transformer == 'sift':
-        trans = sift_ext
-        bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
-    elif transformer == 'surf':
-        trans = surf_ext
-        bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
-    elif transformer == 'orb':
-        trans = orb_ext
-        bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
-    else:
-        return None
-
-    keypoints, descriptors = trans(original)
-    keypointst2, descriptors2 = trans(original2)
-
-    matches = bf.match(descriptors, descriptors2)
-    matches = sorted(matches, key=lambda x: x.distance)
-
-    N_MATCHES = n_matches
-
-    match_img = cv2.drawMatches(
-        img, keypoints,
-        img2, keypoints,
-        matches[:N_MATCHES], img2.copy(), flags=2)
-
-    plt_img(match_img, large=True, save_as=transformer, titles=[transformer + ' match'])
-
-    return
-
-
 # generate bag-of-words
 def generate_bag(data):
     bag = []
     for row in data:
-        for i in row:
-            bag.append(i)
+        for des in row:
+            bag.append(des)
     return bag
 
 
-# generate feature vector after clustering
-def generate_histo(img_col, ext):
-    # initialize feature extraction method
-    if ext == 'sift':
-        ext = sift_ext
-        desc = sift_des
-
-    elif ext == 'surf':
-        ext = surf_ext
-        desc = surf_des
-
-    elif ext == 'orb':
-        ext = orb_ext
-        desc = orb_des
-    else:
-        return
-
-    # convert to descriptors
-    img_des = img_col.apply(desc)
-
-    # generate bag of words
-    bag = generate_bag(img_des)
-
-
-    # clustering
-    k = 2 * 10
-    kmeans = KMeans(n_clusters=k).fit(bag)
-    kmeans.verbose = False
-
-    # generate histogram/feature vector
-    histo_list = []
-    for img in img_col:
-        img = np.uint8(img)
-        kp, des = ext(img)
-
-        histo = np.zeros(k)
-        nkp = np.size(kp)
-
-        for d in des:
-            idx = kmeans.predict([d])
-            histo[idx] += 1 / nkp  # Because we need normalized histograms, I prefere to add 1/nkp directly
-
-        histo_list.append(histo)
-    return histo_list
+# # match images using desriptors
+# def matcher(original, original2, n_matches=80, transformer='sift'):
+#     img = np.uint8(original)
+#     img2 = np.uint8(original2)
+#
+#     if transformer == 'sift':
+#         trans = sift_ext
+#         bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+#     elif transformer == 'surf':
+#         trans = surf_ext
+#         bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+#     elif transformer == 'orb':
+#         trans = orb_ext
+#         bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+#     else:
+#         return None
+#
+#     keypoints, descriptors = trans(original)
+#     keypointst2, descriptors2 = trans(original2)
+#
+#     matches = bf.match(descriptors, descriptors2)
+#     matches = sorted(matches, key=lambda x: x.distance)
+#
+#     N_MATCHES = n_matches
+#
+#     match_img = cv2.drawMatches(
+#         img, keypoints,
+#         img2, keypoints,
+#         matches[:N_MATCHES], img2.copy(), flags=2)
+#
+#     plt_img(match_img, large=True, save_as=transformer, titles=[transformer + ' match'])
+#
+#     return
+#
+#
+# # generate feature vector after clustering
+# def generate_histo(img_col, ext):
+#     # initialize feature extraction method
+#     if ext == 'sift':
+#         ext = sift_ext
+#         desc = sift_des
+#
+#     elif ext == 'surf':
+#         ext = surf_ext
+#         desc = surf_des
+#
+#     elif ext == 'orb':
+#         ext = orb_ext
+#         desc = orb_des
+#     else:
+#         return
+#
+#     # convert to descriptors
+#     img_des = img_col.apply(desc)
+#
+#     # generate bag of words
+#     bag = generate_bag(img_des)
+#
+#
+#     # clustering
+#     k = 2 * 10
+#     kmeans = KMeans(n_clusters=k).fit(bag)
+#     kmeans.verbose = False
+#
+#     # generate histogram/feature vector
+#     histo_list = []
+#     for img in img_col:
+#         img = np.uint8(img)
+#         kp, des = ext(img)
+#
+#         histo = np.zeros(k)
+#         nkp = np.size(kp)
+#
+#         for d in des:
+#             idx = kmeans.predict([d])
+#             histo[idx] += 1 / nkp  # Because we need normalized histograms, I prefere to add 1/nkp directly
+#
+#         histo_list.append(histo)
+#     return histo_list

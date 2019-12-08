@@ -6,7 +6,7 @@ Created on Tue Oct  8 09:27:16 2019
 
 
 from config import SCORING
-from preprocessing import to_arr, mms_ft, pca_ft, label_ft
+from preprocessing import to_arr, pca_ft
 
 
 from sklearn.preprocessing import LabelEncoder
