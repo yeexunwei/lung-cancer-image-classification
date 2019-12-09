@@ -38,7 +38,8 @@ def pca_ft(arr):
     pca = PCA(n_components=d)
     components = pca.fit_transform(arr)
     projected = pca.inverse_transform(components)
-    
+
+    print("n_components: {}".format(d))
     print("reduced shape: " + str(components.shape))
     print("recovered shape: " + str(projected.shape))
 

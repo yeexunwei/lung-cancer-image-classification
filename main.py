@@ -61,19 +61,24 @@ RANDOM_STATE = 9
 
 classifier = DecisionTreeClassifier(random_state=RANDOM_STATE)
 classifiers = [
-    ('NB', GaussianNB()),
+    # ('NB', GaussianNB()),
     ('LSVC', LinearSVC()),
     ('SVC', SVC(random_state=RANDOM_STATE, gamma='scale')),
-    ('LOGR', LogisticRegression(random_state=RANDOM_STATE, solver='lbfgs')),
-    ('SGD', SGDClassifier()),
-    ('KNN', KNeighborsClassifier()),
+    # ('LOGR', LogisticRegression(random_state=RANDOM_STATE, solver='lbfgs')),
+    # ('SGD', SGDClassifier()),
+    # ('KNN', KNeighborsClassifier()),
     ('CART', DecisionTreeClassifier(random_state=RANDOM_STATE)),
     ('RF', RandomForestClassifier(n_estimators=100, random_state=RANDOM_STATE)),
     ('ABC', AdaBoostClassifier()),
     ('GBC', GradientBoostingClassifier()),
-    ('LDA', LinearDiscriminantAnalysis()),
+    # ('LDA', LinearDiscriminantAnalysis()),
     ('MLP', MLPClassifier())
 ]
+
+
+def time_it():
+    dif = (time.time()-t0) / 60
+    print("Used time: {:.2f}".format(dif))
 
 
 # Utility function to report best scores
@@ -97,31 +102,38 @@ transformation_transformer = Pipeline(steps=[
     ('pca', PCA())
 ])
 
-extraction_transformer = Pipeline(steps=[
-    #     ('cluster', KMeans()),
-])
+# extraction_transformer = Pipeline(steps=[
+#     #     ('cluster', KMeans()),
+# ])
+#
+# preprocessor = ColumnTransformer(
+#     transformers=[
+#         ('trans', transformation_transformer, TRANSFORMATION_LIST)
+#     ])
 
-preprocessor = ColumnTransformer(
-    transformers=[
-        ('trans', transformation_transformer, TRANSFORMATION_LIST)
-    ])
-
+t0 = time.time()
 
 "Load and split data"
+
+print("loading data")
 
 X = np.load(OUTPUT_FOLDER + 'll.npy', allow_pickle=True)
 y = np.load(Y_LABEL)
 
+X = transformation_transformer.fit_transform(X)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
+
+time_it()
 
 
 "Find best classifier"
+
+print("finding best classifier")
 
 result_feature = []
 
 for name, classifier in classifiers:
     pipe = Pipeline(steps=[
-#         ('preprocessor', preprocessor),
         ('classifier', classifier)
     ])
     pipe.fit(X_train, y_train)
@@ -133,30 +145,35 @@ for name, classifier in classifiers:
 #     print(classifier)
 #     print("model score: %.3f" % score)
 
+time_it()
 
-"Cross validation"
+# "Cross validation to select best feature"
+#
+# pipeline = Pipeline(steps=[
+#     ('transform', transformation_transformer),
+#     ('classifier', DecisionTreeClassifier(random_state=9))
+# ])
+#
+# scores = cross_val_score(pipeline,X_train,y_train,cv=10,scoring='accuracy')
+# print(scores)
+#
+#
 
-pipeline = Pipeline(steps=[
-    ('transform', transformation_transformer),
-    ('classifier', DecisionTreeClassifier(random_state=9))
-])
-
-scores = cross_val_score(pipeline,X_train,y_train,cv=10,scoring='accuracy')
-print(scores)
 
 
-"Find best feature"
 
-"Hyperparam tuning"
 
-param_dist = {"max_depth": [3, None],
-              "max_features": [1, None],
-              "min_samples_split": sp_randint(2, 11),
-              "criterion": ["gini", "entropy"]}
-
-n_iter_search = 5
-random_search = RandomizedSearchCV(classifier, param_distributions=param_dist,
-                                   n_iter=n_iter_search, cv=10, iid=False)
-
-random_search.fit(X_train, y_train)
-report(random_search.cv_results_)
+#
+# "Hyperparam tuning"
+#
+# param_dist = {"max_depth": [3, None],
+#               "max_features": [1, None],
+#               "min_samples_split": sp_randint(2, 11),
+#               "criterion": ["gini", "entropy"]}
+#
+# n_iter_search = 5
+# random_search = RandomizedSearchCV(classifier, param_distributions=param_dist,
+#                                    n_iter=n_iter_search, cv=10, iid=False)
+#
+# random_search.fit(X_train, y_train)
+# report(random_search.cv_results_)

@@ -89,42 +89,42 @@ def generate_histogram(des_file):
 
 
 if __name__ == '__main__':
-    "Get pixel"
-    try:
-        pixel = np.load(PIXEL_ARRAY, allow_pickle=True)
-        print(PIXEL_ARRAY + " success read")
-    except:
-        print(PIXEL_ARRAY + " does not exist, generating a new one...")
-        # load label data
-        data = pd.read_csv(DATA_CSV, dtype=DTYPE)
-
-        # load pixel according to slice number
-        pixel = data.apply(scan_to_df, axis=1)
-        y = data['malignancy'].astype(int)
-        np.save(PIXEL_ARRAY, pixel)
-        np.save(Y_LABEL, y)
-        # pixel.to_pickle(PIXEL_ARRAY)
-        # y.to_pickle(Y_LABEL)
-
-    "Generate files"
-    for item in PKL:
-        generate_series(item, pixel)
-
-    del pixel
-    ll1 = OUTPUT_FOLDER + 'll' + FORMAT
-    ll1 = np.load(ll1, allow_pickle=True)
-    for filename in PKL2:
-        generate_series(filename, ll1)
-
-    del ll1
-    ll2 = OUTPUT_FOLDER + 'll2' + FORMAT
-    ll2 = np.load(ll2, allow_pickle=True)
-    for filename in PKL3:
-        generate_series(filename, ll2)
-    del ll2
+    # "Get pixel"
+    # try:
+    #     pixel = np.load(PIXEL_ARRAY, allow_pickle=True)
+    #     print(PIXEL_ARRAY + " success read")
+    # except:
+    #     print(PIXEL_ARRAY + " does not exist, generating a new one...")
+    #     # load label data
+    #     data = pd.read_csv(DATA_CSV, dtype=DTYPE)
+    #
+    #     # load pixel according to slice number
+    #     pixel = data.apply(scan_to_df, axis=1)
+    #     y = data['malignancy'].astype(int)
+    #     np.save(PIXEL_ARRAY, pixel)
+    #     np.save(Y_LABEL, y)
+    #     # pixel.to_pickle(PIXEL_ARRAY)
+    #     # y.to_pickle(Y_LABEL)
+    #
+    # "Generate files"
+    # for item in PKL:
+    #     generate_series(item, pixel)
+    #
+    # del pixel
+    # ll1 = OUTPUT_FOLDER + 'll' + FORMAT
+    # ll1 = np.load(ll1, allow_pickle=True)
+    # for filename in PKL2:
+    #     generate_series(filename, ll1)
+    #
+    # del ll1
+    # ll2 = OUTPUT_FOLDER + 'll2' + FORMAT
+    # ll2 = np.load(ll2, allow_pickle=True)
+    # for filename in PKL3:
+    #     generate_series(filename, ll2)
+    # del ll2
 
     "Generate histograms"
     for root, dirs, files in os.walk(OUTPUT_FOLDER):
         for file in files:
-            if ('sift' in file or 'surf' in file or 'orb' in file) and file.endswith(FORMAT):
+            if ('sift' in file or 'surf' in file or 'orb' in file) and ('histo' not in file) and file.endswith(FORMAT):
                 generate_histogram(file[:-4])
