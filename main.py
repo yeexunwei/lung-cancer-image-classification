@@ -19,6 +19,7 @@ from sys import getsizeof
 # preprocessing
 from config import DATA_CSV, PIXEL_ARRAY, DTYPE, Y_LABEL
 from config import FEATURES, OUTPUT_FOLDER, FORMAT
+from config import FEATURES_ARRAY, FEATURES_ARRAY2, FEATURES_ARRAY3
 from preprocessing import to_arr
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import ADASYN, SMOTE, RandomOverSampler
@@ -53,7 +54,8 @@ from sklearn.svm import SVC, LinearSVC, NuSVC
 from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier  # , GradientBoostingClassifier
+import xgboost as xgb
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
 
@@ -64,20 +66,21 @@ classifiers = [
     # ('NB', GaussianNB()),
     ('LSVC', LinearSVC()),
     ('SVC', SVC(random_state=RANDOM_STATE, gamma='scale')),
-    # ('LOGR', LogisticRegression(random_state=RANDOM_STATE, solver='lbfgs')),
-    # ('SGD', SGDClassifier()),
-    # ('KNN', KNeighborsClassifier()),
+    ('LOGR', LogisticRegression(random_state=RANDOM_STATE, solver='lbfgs')),
+    ('SGD', SGDClassifier()),
+    ('KNN', KNeighborsClassifier()),
     ('CART', DecisionTreeClassifier(random_state=RANDOM_STATE)),
     ('RF', RandomForestClassifier(n_estimators=100, random_state=RANDOM_STATE)),
     ('ABC', AdaBoostClassifier()),
-    ('GBC', GradientBoostingClassifier()),
+    # ('XGB', xgb.XGBRegressor()),
+    # ('GBC', GradientBoostingClassifier()),
     # ('LDA', LinearDiscriminantAnalysis()),
     ('MLP', MLPClassifier())
 ]
 
 
 def time_it():
-    dif = (time.time()-t0) / 60
+    dif = (time.time() - t0) / 60
     print("Used time: {:.2f}".format(dif))
 
 
@@ -88,18 +91,28 @@ def report(results, n_top=3):
         for candidate in candidates:
             print("Model with rank: {0}".format(i))
             print("Mean validation score: {0:.3f} (std: {1:.3f})".format(
-                  results['mean_test_score'][candidate],
-                  results['std_test_score'][candidate]))
+                results['mean_test_score'][candidate],
+                results['std_test_score'][candidate]))
             print("Parameters: {0}".format(results['params'][candidate]))
             print("")
 
 
+def save_result(all_results, filename):
+    compare = pd.DataFrame(all_results)
+    compare['feature'] = features
+    compare = compare.set_index('feature')
+    compare.to_csv(filename + '.csv')
+
+
 "Pipeline"
 
-transformation_transformer = Pipeline(steps=[
+transformer_pipe = Pipeline(steps=[
     ('to_arr', FunctionTransformer(to_arr)),
+    # ('oversample', RandomOverSampler(random_state=RANDOM_STATE)),
+    # ('oversample', ADASYN(random_state=RANDOM_STATE)),
+    ('oversample', SMOTE(random_state=RANDOM_STATE)),
     ('minmax', MinMaxScaler()),
-    ('pca', PCA())
+    # ('pca', PCA())
 ])
 
 # extraction_transformer = Pipeline(steps=[
@@ -108,49 +121,67 @@ transformation_transformer = Pipeline(steps=[
 #
 # preprocessor = ColumnTransformer(
 #     transformers=[
-#         ('trans', transformation_transformer, TRANSFORMATION_LIST)
+#         ('trans', transformer_pipe, TRANSFORMATION_LIST)
 #     ])
 
 t0 = time.time()
 
 "Load and split data"
 
-print("loading data")
-
-X = np.load(OUTPUT_FOLDER + 'll.npy', allow_pickle=True)
+# print("loading data")
+#
+# X = np.load(OUTPUT_FOLDER + 'll.npy', allow_pickle=True)
 y = np.load(Y_LABEL)
 
-X = transformation_transformer.fit_transform(X)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
-
-time_it()
+# time_it()
 
 
 "Find best classifier"
 
 print("finding best classifier")
 
-result_feature = []
+features = FEATURES_ARRAY
+all_acc = []
+all_rec = []
 
-for name, classifier in classifiers:
-    pipe = Pipeline(steps=[
-        ('classifier', classifier)
-    ])
-    pipe.fit(X_train, y_train)
-    score = pipe.score(X_test, y_test)
+for feature in features:
+    X = np.load(feature, allow_pickle=True)
 
-    result = {}
-    result[name] = score
-    print(result)
-#     print(classifier)
-#     print("model score: %.3f" % score)
+    X = transformer_pipe.fit_transform(X)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
+
+    feature_acc = []
+    feature_rec = []
+    for name, classifier in classifiers:
+        pipe = Pipeline(steps=[
+            ('classifier', classifier)
+        ])
+        pipe.fit(X_train, y_train)
+
+        # score = pipe.score(X_test, y_test)
+        acc_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='accuracy')
+        acc_result = {name: acc_score}
+
+        rec_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='recall')
+        rec_result = {name: rec_score}
+
+        feature_acc.append(acc_result)
+        feature_rec.append(rec_result)
+        print(acc_score, rec_score)
+
+    all_acc.append(feature_acc)
+    all_rec.append(feature_rec)
+
+
+save_result(all_acc, 'accuracy')
+save_result(all_rec, 'recall')
 
 time_it()
 
 # "Cross validation to select best feature"
 #
 # pipeline = Pipeline(steps=[
-#     ('transform', transformation_transformer),
+#     ('transform', transformer_pipe),
 #     ('classifier', DecisionTreeClassifier(random_state=9))
 # ])
 #
@@ -158,9 +189,6 @@ time_it()
 # print(scores)
 #
 #
-
-
-
 
 
 #
