@@ -44,7 +44,8 @@ Y_LABEL = OUTPUT_FOLDER + 'malignancy' + FORMAT
 "All features and filenames"
 
 # TRANSFORMATION_LIST = ['LL', 'LH', 'HL', 'HH', 'lbp', 'fft']
-TRANSFORMATION_LIST = ['ll', 'lh', 'hl', 'hh', 'lbp', 'fft']
+# TRANSFORMATION_LIST = ['ll', 'lh', 'hl', 'hh', 'lbp', 'fft']
+TRANSFORMATION_LIST = ['ll', 'lh', 'hl', 'hh', 'fft']
 EXTRACTION_LIST = ['sift', 'surf', 'orb']
 
 FEATURES = TRANSFORMATION_LIST.copy()

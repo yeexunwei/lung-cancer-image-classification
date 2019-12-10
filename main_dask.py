@@ -9,44 +9,19 @@ Created on Mon Oct  7 23:27:49 2019
 
 import numpy as np
 import pandas as pd
-import pickle
-import cv2
-import matplotlib.pyplot as plt
 
 import time
-from sys import getsizeof
 
 # preprocessing
 from config import DATA_CSV, PIXEL_ARRAY, DTYPE, Y_LABEL
 from config import FEATURES, OUTPUT_FOLDER, FORMAT
 from config import FEATURES_ARRAY, FEATURES_ARRAY2, FEATURES_ARRAY3
 from preprocessing import to_arr
-from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import ADASYN, SMOTE, RandomOverSampler
-
-# image processing
-from image_processing import sift_ext, surf_ext, orb_ext
-from image_processing import sift_des, surf_des, orb_des
-from image_processing import generate_bag
 
 # pipeline
 from sklearn.pipeline import Pipeline
-from sklearn.compose import ColumnTransformer
-from config import TRANSFORMATION_LIST, EXTRACTION_LIST
 from sklearn.preprocessing import FunctionTransformer
-
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.cluster import KMeans, MiniBatchKMeans
-from sklearn.decomposition import PCA
-
-from sklearn.model_selection import cross_val_score
-from sklearn.model_selection import train_test_split
-
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import silhouette_score
-from sklearn.model_selection import RandomizedSearchCV
-from scipy.stats import randint as sp_randint
-from sklearn.metrics import accuracy_score, log_loss
 
 # model
 from sklearn.naive_bayes import GaussianNB
@@ -58,6 +33,16 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier  # , Gra
 import xgboost as xgb
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
+
+import dask
+import dask.array as da
+from dask_ml.preprocessing import MinMaxScaler
+from dask_ml.wrappers import Incremental
+from dask_ml.model_selection import train_test_split
+
+# from dask.distributed import Client
+# client = Client(n_workers=4, threads_per_worker=1)
+# client
 
 RANDOM_STATE = 0
 
@@ -107,19 +92,10 @@ def save_result(all_results, filename):
 "Pipeline"
 
 transformer_pipe = Pipeline(steps=[
-    ('to_arr', FunctionTransformer(to_arr)),
+    # ('to_arr', FunctionTransformer(to_arr)),
     ('minmax', MinMaxScaler()),
     # ('pca', PCA())
 ])
-
-# extraction_transformer = Pipeline(steps=[
-#     #     ('cluster', KMeans()),
-# ])
-#
-# preprocessor = ColumnTransformer(
-#     transformers=[
-#         ('trans', transformer_pipe, TRANSFORMATION_LIST)
-#     ])
 
 t0 = time.time()
 
@@ -142,56 +118,61 @@ all_acc = []
 all_rec = []
 
 # [OUTPUT_FOLDER + 'lbp' + FORMAT]: #
-for feature in features:
+# for feature in features:
+for feature in [OUTPUT_FOLDER + 'lbp' + FORMAT]:  # features:
     print("""
     ----------------------------------
     getting feature {}: {}
     """.format(features.index(feature), feature))
     X = np.load(feature, allow_pickle=True)
+    # X = to_arr(X)
+    X = da.from_array(X, chunks=X.shape)
 
     X = transformer_pipe.fit_transform(X)
-    print(X.shape)
-    print(y.shape)
-    print()
+    # print(X.shape)
+    # print(y.shape)
+    # print()
 
     # RandomOverSampler(random_state=RANDOM_STATE)
     # ADASYN(random_state=RANDOM_STATE)
     smote = SMOTE(random_state=RANDOM_STATE)
+    smote.fit(X, y)
     X_res, y_res = smote.fit_resample(X, y)
-    print(X.shape)
-    print(y.shape)
-    print(X_res.shape)
-    print(y_res.shape)
+    # print(X.shape)
+    # print(y.shape)
+    # print(X_res.shape)
+    # print(y_res.shape)
 
-    X_train, X_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2, stratify=y_res)
+    X_train, X_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2)
+    # X_train, X_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2, stratify=y)
 
     feature_acc = []
     feature_rec = []
-    for name, classifier in classifiers:
-        pipe = Pipeline(steps=[
-            ('classifier', classifier)
-        ])
-        pipe.fit(X_train, y_train)
-
-        # score = pipe.score(X_test, y_test)
-        acc_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='accuracy')
-        acc_result = {name: acc_score}
-
-        rec_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='recall')
-        rec_result = {name: rec_score}
-
-        feature_acc.append(acc_result)
-        feature_rec.append(rec_result)
-        print(acc_score, rec_score)
-
-    np.save(feature + '_acc.npy', feature_acc)
-    np.save(feature + '_rec.npy', feature_rec)
-    all_acc.append(feature_acc)
-    all_rec.append(feature_rec)
-
-
-save_result(all_acc, 'accuracy')
-save_result(all_rec, 'recall')
+#     for name, classifier in classifiers:
+#         pipe = Pipeline(steps=[
+#             ('classifier', classifier)
+#         ])
+#         pipe.fit(X_train, y_train)
+#
+#         # score = pipe.score(X_test, y_test)
+#         acc_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='accuracy')
+#         acc_result = {name: acc_score}
+#
+#         rec_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='recall')
+#         rec_result = {name: rec_score}
+#
+#         feature_acc.append(acc_result)
+#         feature_rec.append(rec_result)
+#         print(acc_score, rec_score)
+#
+#     np.save(feature + '_acc.npy', feature_acc)
+#     np.save(feature + '_rec.npy', feature_rec)
+#     all_acc.append(feature_acc)
+#     all_rec.append(feature_rec)
+#
+#
+# save_result(all_acc, 'accuracy')
+# save_result(all_rec, 'recall')
 
 time_it()
 
