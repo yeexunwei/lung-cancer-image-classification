@@ -59,19 +59,19 @@ import xgboost as xgb
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
 
-RANDOM_STATE = 9
+RANDOM_STATE = 0
 
 classifier = DecisionTreeClassifier(random_state=RANDOM_STATE)
 classifiers = [
     # ('NB', GaussianNB()),
-    ('LSVC', LinearSVC()),
+    # ('LSVC', LinearSVC()),
     ('SVC', SVC(random_state=RANDOM_STATE, gamma='scale')),
-    ('LOGR', LogisticRegression(random_state=RANDOM_STATE, solver='lbfgs')),
-    ('SGD', SGDClassifier()),
-    ('KNN', KNeighborsClassifier()),
-    ('CART', DecisionTreeClassifier(random_state=RANDOM_STATE)),
+    ('LOGR', LogisticRegression(random_state=RANDOM_STATE, solver='lbfgs', max_iter=100)),
+    # ('SGD', SGDClassifier()),
+    # ('KNN', KNeighborsClassifier()),
+    ('CART', DecisionTreeClassifier(criterion='gini', random_state=RANDOM_STATE)),
     ('RF', RandomForestClassifier(n_estimators=100, random_state=RANDOM_STATE)),
-    ('ABC', AdaBoostClassifier()),
+    # ('ABC', AdaBoostClassifier()),
     # ('XGB', xgb.XGBRegressor()),
     # ('GBC', GradientBoostingClassifier()),
     # ('LDA', LinearDiscriminantAnalysis()),
@@ -101,16 +101,13 @@ def save_result(all_results, filename):
     compare = pd.DataFrame(all_results)
     compare['feature'] = features
     compare = compare.set_index('feature')
-    compare.to_csv(filename + '.csv')
+    compare.to_pickle(filename + '.pkl')
 
 
 "Pipeline"
 
 transformer_pipe = Pipeline(steps=[
     ('to_arr', FunctionTransformer(to_arr)),
-    # ('oversample', RandomOverSampler(random_state=RANDOM_STATE)),
-    # ('oversample', ADASYN(random_state=RANDOM_STATE)),
-    ('oversample', SMOTE(random_state=RANDOM_STATE)),
     ('minmax', MinMaxScaler()),
     # ('pca', PCA())
 ])
@@ -145,9 +142,20 @@ all_acc = []
 all_rec = []
 
 for feature in features:
+    print("""
+    ----------------------------------
+    getting feature {}: {}
+    """.format(features.index(feature), feature))
     X = np.load(feature, allow_pickle=True)
 
     X = transformer_pipe.fit_transform(X)
+
+    # RandomOverSampler(random_state=RANDOM_STATE)
+    # ADASYN(random_state=RANDOM_STATE)
+    smote = SMOTE(random_state=RANDOM_STATE)
+    smote.fit(X, y)
+    X, y = smote.fit_resample(X, y)
+
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
 
     feature_acc = []
