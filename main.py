@@ -75,7 +75,7 @@ classifiers = [
     # ('XGB', xgb.XGBRegressor()),
     # ('GBC', GradientBoostingClassifier()),
     # ('LDA', LinearDiscriminantAnalysis()),
-    ('MLP', MLPClassifier())
+    ('MLP', MLPClassifier(hidden_layer_sizes=(100, ), activation='relu', random_state=RANDOM_STATE))
 ]
 
 
@@ -141,6 +141,7 @@ features = FEATURES_ARRAY
 all_acc = []
 all_rec = []
 
+# [OUTPUT_FOLDER + 'lbp' + FORMAT]: #
 for feature in features:
     print("""
     ----------------------------------
@@ -154,35 +155,37 @@ for feature in features:
     # ADASYN(random_state=RANDOM_STATE)
     smote = SMOTE(random_state=RANDOM_STATE)
     smote.fit(X, y)
-    X, y = smote.fit_resample(X, y)
+    X_res, y_res = smote.fit_resample(X, y)
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y)
+    X_train, X_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2, stratify=y)
 
     feature_acc = []
     feature_rec = []
-    for name, classifier in classifiers:
-        pipe = Pipeline(steps=[
-            ('classifier', classifier)
-        ])
-        pipe.fit(X_train, y_train)
-
-        # score = pipe.score(X_test, y_test)
-        acc_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='accuracy')
-        acc_result = {name: acc_score}
-
-        rec_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='recall')
-        rec_result = {name: rec_score}
-
-        feature_acc.append(acc_result)
-        feature_rec.append(rec_result)
-        print(acc_score, rec_score)
-
-    all_acc.append(feature_acc)
-    all_rec.append(feature_rec)
-
-
-save_result(all_acc, 'accuracy')
-save_result(all_rec, 'recall')
+#     for name, classifier in classifiers:
+#         pipe = Pipeline(steps=[
+#             ('classifier', classifier)
+#         ])
+#         pipe.fit(X_train, y_train)
+#
+#         # score = pipe.score(X_test, y_test)
+#         acc_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='accuracy')
+#         acc_result = {name: acc_score}
+#
+#         rec_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='recall')
+#         rec_result = {name: rec_score}
+#
+#         feature_acc.append(acc_result)
+#         feature_rec.append(rec_result)
+#         print(acc_score, rec_score)
+#
+#     np.save(feature + '_acc.npy', feature_acc)
+#     np.save(feature + '_rec.npy', feature_rec)
+#     all_acc.append(feature_acc)
+#     all_rec.append(feature_rec)
+#
+#
+# save_result(all_acc, 'accuracy')
+# save_result(all_rec, 'recall')
 
 time_it()
 
