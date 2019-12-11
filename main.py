@@ -81,7 +81,7 @@ classifiers = [
 
 def time_it():
     dif = (time.time() - t0) / 60
-    print("Used time: {:.2f}".format(dif))
+    print("Used time: {:.2f} min    {:.2f}".format(dif, time.time()))
 
 
 # Utility function to report best scores
@@ -137,31 +137,32 @@ y = np.load(Y_LABEL)
 
 print("finding best classifier")
 
-features = FEATURES_ARRAY
-all_acc = []
-all_rec = []
+features = FEATURES_ARRAY2
 
 # [OUTPUT_FOLDER + 'lbp' + FORMAT]: #
 for feature in features:
     print("""
     ----------------------------------
     getting feature {}: {}
+    ----------------------------------
     """.format(features.index(feature), feature))
     X = np.load(feature, allow_pickle=True)
 
     X = transformer_pipe.fit_transform(X)
-    print(X.shape)
-    print(y.shape)
-    print()
+    # print(X.shape)
+    # print(y.shape)
+    # print()
 
     # RandomOverSampler(random_state=RANDOM_STATE)
     # ADASYN(random_state=RANDOM_STATE)
-    smote = SMOTE(random_state=RANDOM_STATE)
-    X_res, y_res = smote.fit_resample(X, y)
-    print(X.shape)
-    print(y.shape)
-    print(X_res.shape)
-    print(y_res.shape)
+    # smote = SMOTE(random_state=RANDOM_STATE)
+    # X_res, y_res = smote.fit_resample(X, y)
+    rus = RandomUnderSampler(random_state=RANDOM_STATE)
+    X_res, y_res = rus.fit_resample(X, y)
+    # print(X.shape)
+    # print(y.shape)
+    # print(X_res.shape)
+    # print(y_res.shape)
 
     X_train, X_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2, stratify=y_res)
 
@@ -184,16 +185,74 @@ for feature in features:
         feature_rec.append(rec_result)
         print(acc_score, rec_score)
 
-    np.save(feature + '_acc.npy', feature_acc)
-    np.save(feature + '_rec.npy', feature_rec)
+    np.save(feature[:-4] + '_acc.npy', feature_acc)
+    np.save(feature[:-4] + '_rec.npy', feature_rec)
+    time_it()
+    t0 = time.time()
+
+
+features = FEATURES_ARRAY3
+
+# [OUTPUT_FOLDER + 'lbp' + FORMAT]: #
+for feature in features:
+    print("""
+    ----------------------------------
+    getting feature {}: {}
+    ----------------------------------
+    """.format(features.index(feature), feature))
+    X = np.load(feature, allow_pickle=True)
+
+    X = transformer_pipe.fit_transform(X)
+    # print(X.shape)
+    # print(y.shape)
+    # print()
+
+    # RandomOverSampler(random_state=RANDOM_STATE)
+    # ADASYN(random_state=RANDOM_STATE)
+    # smote = SMOTE(random_state=RANDOM_STATE)
+    # X_res, y_res = smote.fit_resample(X, y)
+    rus = RandomUnderSampler(random_state=RANDOM_STATE)
+    X_res, y_res = rus.fit_resample(X, y)
+    # print(X.shape)
+    # print(y.shape)
+    # print(X_res.shape)
+    # print(y_res.shape)
+
+    X_train, X_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2, stratify=y_res)
+
+    feature_acc = []
+    feature_rec = []
+    for name, classifier in classifiers:
+        pipe = Pipeline(steps=[
+            ('classifier', classifier)
+        ])
+        pipe.fit(X_train, y_train)
+
+        # score = pipe.score(X_test, y_test)
+        acc_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='accuracy')
+        acc_result = {name: acc_score}
+
+        rec_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='recall')
+        rec_result = {name: rec_score}
+
+        feature_acc.append(acc_result)
+        feature_rec.append(rec_result)
+        print(acc_score, rec_score)
+
+    np.save(feature[:-4] + '_acc.npy', feature_acc)
+    np.save(feature[:-4] + '_rec.npy', feature_rec)
     all_acc.append(feature_acc)
     all_rec.append(feature_rec)
-
-
-save_result(all_acc, 'accuracy')
-save_result(all_rec, 'recall')
+    time_it()
+    t0 = time.time()
 
 time_it()
+
+
+
+
+
+
 
 # "Cross validation to select best feature"
 #

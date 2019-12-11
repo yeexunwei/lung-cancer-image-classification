@@ -45,11 +45,11 @@ Y_LABEL = OUTPUT_FOLDER + 'malignancy' + FORMAT
 
 # TRANSFORMATION_LIST = ['LL', 'LH', 'HL', 'HH', 'lbp', 'fft']
 # TRANSFORMATION_LIST = ['ll', 'lh', 'hl', 'hh', 'lbp', 'fft']
-TRANSFORMATION_LIST = ['ll', 'lh', 'hl', 'hh', 'fft']
+TRANSFORMATION_LIST = ['lh', 'hl', 'hh']
 EXTRACTION_LIST = ['sift', 'surf', 'orb']
 
 FEATURES = TRANSFORMATION_LIST.copy()
-FEATURES.extend('histo_' + feature for feature in EXTRACTION_LIST)
+# FEATURES.extend('histo_' + feature for feature in EXTRACTION_LIST)
 
 FEATURES_ARRAY = [OUTPUT_FOLDER + feature + FORMAT for feature in FEATURES]
 FEATURES_ARRAY2 = [OUTPUT_FOLDER + feature + '2' + FORMAT for feature in FEATURES]
