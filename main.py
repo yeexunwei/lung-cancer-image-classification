@@ -10,11 +10,7 @@ Created on Mon Oct  7 23:27:49 2019
 import numpy as np
 import pandas as pd
 import pickle
-import cv2
-import matplotlib.pyplot as plt
-
 import time
-from sys import getsizeof
 
 # preprocessing
 from config import DATA_CSV, PIXEL_ARRAY, DTYPE, Y_LABEL
@@ -24,21 +20,13 @@ from preprocessing import to_arr
 from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import ADASYN, SMOTE, RandomOverSampler
 
-# image processing
-from image_processing import sift_ext, surf_ext, orb_ext
-from image_processing import sift_des, surf_des, orb_des
-from image_processing import generate_bag
 
 # pipeline
 from sklearn.pipeline import Pipeline
-from sklearn.compose import ColumnTransformer
 from config import TRANSFORMATION_LIST, EXTRACTION_LIST
 from sklearn.preprocessing import FunctionTransformer
 
 from sklearn.preprocessing import MinMaxScaler
-from sklearn.cluster import KMeans, MiniBatchKMeans
-from sklearn.decomposition import PCA
-
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 
@@ -58,6 +46,8 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier  # , Gra
 import xgboost as xgb
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
+
+from sklearn.metrics import accuracy_score, recall_score, precision_score, classification_report, roc_auc_score
 
 RANDOM_STATE = 0
 
@@ -104,6 +94,26 @@ def save_result(all_results, filename):
     compare.to_pickle(filename + '.pkl')
 
 
+def save_model():
+    """Model training"""
+    # Fit the model on training set
+    # model = RandomForestClassifier()
+    model = DecisionTreeClassifier(random_state=RANDOM_STATE)
+    model.fit(X_train, y_train)
+
+    y_pred = model.predict(X_test)
+
+    print(accuracy_score(y_test, y_pred))
+    print(recall_score(y_test, y_pred))
+    print(roc_auc_score(y_test, y_pred))
+    print(classification_report(y_test, y_pred))
+
+    "Save the model"
+    # model.fit(X, y)
+    # filename = 'model.sav'
+    # pickle.dump(model, open(filename, 'wb'))
+
+
 "Pipeline"
 
 transformer_pipe = Pipeline(steps=[
@@ -137,135 +147,66 @@ y = np.load(Y_LABEL)
 
 print("finding best classifier")
 
-features = FEATURES_ARRAY2
+features = FEATURES_ARRAY
 
-# [OUTPUT_FOLDER + 'lbp' + FORMAT]: #
+# for feature in [OUTPUT_FOLDER + 'lh' + FORMAT]:  # features:
 for feature in features:
     print("""
     ----------------------------------
-    getting feature {}: {}
+    getting feature: {}
     ----------------------------------
-    """.format(features.index(feature), feature))
-    X = np.load(feature, allow_pickle=True)
+    """.format(feature))
 
+    X = np.load(feature, allow_pickle=True)
     X = transformer_pipe.fit_transform(X)
-    # print(X.shape)
-    # print(y.shape)
-    # print()
+
+    "Resampling"
+    # rus = RandomUnderSampler(random_state=RANDOM_STATE)
+    # X_res, y_res = rus.fit_resample(X, y)
 
     # RandomOverSampler(random_state=RANDOM_STATE)
     # ADASYN(random_state=RANDOM_STATE)
-    # smote = SMOTE(random_state=RANDOM_STATE)
-    # X_res, y_res = smote.fit_resample(X, y)
-    rus = RandomUnderSampler(random_state=RANDOM_STATE)
-    X_res, y_res = rus.fit_resample(X, y)
-    # print(X.shape)
-    # print(y.shape)
-    # print(X_res.shape)
-    # print(y_res.shape)
+    smote = SMOTE(random_state=RANDOM_STATE)
+    X_res, y_res = smote.fit_resample(X, y)
 
     X_train, X_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2, stratify=y_res)
 
-    feature_acc = []
-    feature_rec = []
-    for name, classifier in classifiers:
-        pipe = Pipeline(steps=[
-            ('classifier', classifier)
-        ])
-        pipe.fit(X_train, y_train)
+    "One model for all"
+    scores = {}
+    model = RandomForestClassifier(random_state=RANDOM_STATE)
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
 
-        # score = pipe.score(X_test, y_test)
-        acc_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='accuracy')
-        acc_result = {name: acc_score}
+    score = accuracy_score(y_pred, y_test)
+    scores[feature] = score
+    np.save('randomforest.npy', scores)
 
-        rec_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='recall')
-        rec_result = {name: rec_score}
+    "Cross validate all models"
+    # feature_acc = []
+    # feature_rec = []
+    # for name, classifier in classifiers:
+    #     pipe = Pipeline(steps=[
+    #         ('classifier', classifier)
+    #     ])
+    #     pipe.fit(X_train, y_train)
+    #
+    #     acc_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='accuracy')
+    #     acc_result = {name: acc_score}
+    #
+    #     rec_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='recall')
+    #     rec_result = {name: rec_score}
+    #
+    #     feature_acc.append(acc_result)
+    #     feature_rec.append(rec_result)
+    #     print(acc_score, rec_score)
+    #
+    # np.save(feature[:-4] + '_acc.npy', feature_acc)
+    # np.save(feature[:-4] + '_rec.npy', feature_rec)
 
-        feature_acc.append(acc_result)
-        feature_rec.append(rec_result)
-        print(acc_score, rec_score)
-
-    np.save(feature[:-4] + '_acc.npy', feature_acc)
-    np.save(feature[:-4] + '_rec.npy', feature_rec)
-    time_it()
-    t0 = time.time()
-
-
-features = FEATURES_ARRAY3
-
-# [OUTPUT_FOLDER + 'lbp' + FORMAT]: #
-for feature in features:
-    print("""
-    ----------------------------------
-    getting feature {}: {}
-    ----------------------------------
-    """.format(features.index(feature), feature))
-    X = np.load(feature, allow_pickle=True)
-
-    X = transformer_pipe.fit_transform(X)
-    # print(X.shape)
-    # print(y.shape)
-    # print()
-
-    # RandomOverSampler(random_state=RANDOM_STATE)
-    # ADASYN(random_state=RANDOM_STATE)
-    # smote = SMOTE(random_state=RANDOM_STATE)
-    # X_res, y_res = smote.fit_resample(X, y)
-    rus = RandomUnderSampler(random_state=RANDOM_STATE)
-    X_res, y_res = rus.fit_resample(X, y)
-    # print(X.shape)
-    # print(y.shape)
-    # print(X_res.shape)
-    # print(y_res.shape)
-
-    X_train, X_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2, stratify=y_res)
-
-    feature_acc = []
-    feature_rec = []
-    for name, classifier in classifiers:
-        pipe = Pipeline(steps=[
-            ('classifier', classifier)
-        ])
-        pipe.fit(X_train, y_train)
-
-        # score = pipe.score(X_test, y_test)
-        acc_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='accuracy')
-        acc_result = {name: acc_score}
-
-        rec_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='recall')
-        rec_result = {name: rec_score}
-
-        feature_acc.append(acc_result)
-        feature_rec.append(rec_result)
-        print(acc_score, rec_score)
-
-    np.save(feature[:-4] + '_acc.npy', feature_acc)
-    np.save(feature[:-4] + '_rec.npy', feature_rec)
-    all_acc.append(feature_acc)
-    all_rec.append(feature_rec)
     time_it()
     t0 = time.time()
 
 time_it()
-
-
-
-
-
-
-
-# "Cross validation to select best feature"
-#
-# pipeline = Pipeline(steps=[
-#     ('transform', transformer_pipe),
-#     ('classifier', DecisionTreeClassifier(random_state=9))
-# ])
-#
-# scores = cross_val_score(pipeline,X_train,y_train,cv=10,scoring='accuracy')
-# print(scores)
-#
-#
-
 
 #
 # "Hyperparam tuning"
