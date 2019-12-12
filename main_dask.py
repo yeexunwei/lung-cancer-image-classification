@@ -4,9 +4,6 @@ Created on Mon Oct  7 23:27:49 2019
 @author: hsunwei
 """
 
-# https://github.com/WillKoehrsen/machine-learning-project-walkthrough/blob/master/Machine%20Learning%20Project%20Part%201.ipynb
-# https://github.com/WillKoehrsen/machine-learning-project-walkthrough
-
 import numpy as np
 import pandas as pd
 
@@ -17,6 +14,7 @@ from config import DATA_CSV, PIXEL_ARRAY, DTYPE, Y_LABEL
 from config import FEATURES, OUTPUT_FOLDER, FORMAT
 from config import FEATURES_ARRAY, FEATURES_ARRAY2, FEATURES_ARRAY3
 from preprocessing import to_arr
+from imblearn.under_sampling import RandomUnderSampler
 from imblearn.over_sampling import ADASYN, SMOTE, RandomOverSampler
 
 # pipeline
@@ -33,6 +31,7 @@ from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier  # , Gra
 import xgboost as xgb
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
 from sklearn.neural_network import MLPClassifier
+from sklearn.metrics import accuracy_score, recall_score, precision_score, classification_report, roc_auc_score
 
 import dask
 import dask.array as da
@@ -99,14 +98,10 @@ transformer_pipe = Pipeline(steps=[
 
 t0 = time.time()
 
+
 "Load and split data"
 
-# print("loading data")
-#
-# X = np.load(OUTPUT_FOLDER + 'll.npy', allow_pickle=True)
 y = np.load(Y_LABEL)
-
-# time_it()
 
 
 "Find best classifier"
@@ -114,92 +109,33 @@ y = np.load(Y_LABEL)
 print("finding best classifier")
 
 features = FEATURES_ARRAY
-all_acc = []
-all_rec = []
 
 # [OUTPUT_FOLDER + 'lbp' + FORMAT]: #
 # for feature in features:
 for feature in [OUTPUT_FOLDER + 'lbp' + FORMAT]:  # features:
     print("""
     ----------------------------------
-    getting feature {}: {}
-    """.format(features.index(feature), feature))
+    getting feature: {}
+    """.format(feature))
     X = np.load(feature, allow_pickle=True)
-    # X = to_arr(X)
+    X = to_arr(X)
+    np.save('lbp_arr', X)
     X = da.from_array(X, chunks=X.shape)
 
     X = transformer_pipe.fit_transform(X)
-    # print(X.shape)
-    # print(y.shape)
-    # print()
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
 
-    # RandomOverSampler(random_state=RANDOM_STATE)
-    # ADASYN(random_state=RANDOM_STATE)
-    smote = SMOTE(random_state=RANDOM_STATE)
-    smote.fit(X, y)
-    X_res, y_res = smote.fit_resample(X, y)
-    # print(X.shape)
-    # print(y.shape)
-    # print(X_res.shape)
-    # print(y_res.shape)
+    classes = da.unique(y_train).compute()
 
-    X_train, X_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2)
-    # X_train, X_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2, stratify=y)
+    "One model for all"
+    inc = Incremental(SVC(random_state=RANDOM_STATE), scoring='accuracy')
+    for _ in range(10):
+        inc.partial_fit(X_train, y_train, classes=classes)
+        print('Score:', inc.score(X_test, y_test))
 
-    feature_acc = []
-    feature_rec = []
-#     for name, classifier in classifiers:
-#         pipe = Pipeline(steps=[
-#             ('classifier', classifier)
-#         ])
-#         pipe.fit(X_train, y_train)
-#
-#         # score = pipe.score(X_test, y_test)
-#         acc_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='accuracy')
-#         acc_result = {name: acc_score}
-#
-#         rec_score = cross_val_score(pipe, X_train, y_train, cv=10, scoring='recall')
-#         rec_result = {name: rec_score}
-#
-#         feature_acc.append(acc_result)
-#         feature_rec.append(rec_result)
-#         print(acc_score, rec_score)
-#
-#     np.save(feature + '_acc.npy', feature_acc)
-#     np.save(feature + '_rec.npy', feature_rec)
-#     all_acc.append(feature_acc)
-#     all_rec.append(feature_rec)
-#
-#
-# save_result(all_acc, 'accuracy')
-# save_result(all_rec, 'recall')
+    score = inc.score(X_test, y_test)
+    print(score)
+
+    np.save('lbp_svm', score)
 
 time_it()
-
-# "Cross validation to select best feature"
-#
-# pipeline = Pipeline(steps=[
-#     ('transform', transformer_pipe),
-#     ('classifier', DecisionTreeClassifier(random_state=9))
-# ])
-#
-# scores = cross_val_score(pipeline,X_train,y_train,cv=10,scoring='accuracy')
-# print(scores)
-#
-#
-
-
-#
-# "Hyperparam tuning"
-#
-# param_dist = {"max_depth": [3, None],
-#               "max_features": [1, None],
-#               "min_samples_split": sp_randint(2, 11),
-#               "criterion": ["gini", "entropy"]}
-#
-# n_iter_search = 5
-# random_search = RandomizedSearchCV(classifier, param_distributions=param_dist,
-#                                    n_iter=n_iter_search, cv=10, iid=False)
-#
-# random_search.fit(X_train, y_train)
-# report(random_search.cv_results_)

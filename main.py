@@ -4,9 +4,6 @@ Created on Mon Oct  7 23:27:49 2019
 @author: hsunwei
 """
 
-# https://github.com/WillKoehrsen/machine-learning-project-walkthrough/blob/master/Machine%20Learning%20Project%20Part%201.ipynb
-# https://github.com/WillKoehrsen/machine-learning-project-walkthrough
-
 import numpy as np
 import pandas as pd
 import pickle
@@ -29,12 +26,6 @@ from sklearn.preprocessing import FunctionTransformer
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
-
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import silhouette_score
-from sklearn.model_selection import RandomizedSearchCV
-from scipy.stats import randint as sp_randint
-from sklearn.metrics import accuracy_score, log_loss
 
 # model
 from sklearn.naive_bayes import GaussianNB
@@ -148,6 +139,7 @@ y = np.load(Y_LABEL)
 print("finding best classifier")
 
 features = FEATURES_ARRAY
+scores = {}
 
 # for feature in [OUTPUT_FOLDER + 'lh' + FORMAT]:  # features:
 for feature in features:
@@ -172,14 +164,12 @@ for feature in features:
     X_train, X_test, y_train, y_test = train_test_split(X_res, y_res, test_size=0.2, stratify=y_res)
 
     "One model for all"
-    scores = {}
-    model = RandomForestClassifier(random_state=RANDOM_STATE)
+    model = SVC(random_state=RANDOM_STATE)
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
     score = accuracy_score(y_pred, y_test)
     scores[feature] = score
-    np.save('randomforest.npy', scores)
 
     "Cross validate all models"
     # feature_acc = []
@@ -206,9 +196,9 @@ for feature in features:
     time_it()
     t0 = time.time()
 
+np.save('svm', scores)
 time_it()
 
-#
 # "Hyperparam tuning"
 #
 # param_dist = {"max_depth": [3, None],
