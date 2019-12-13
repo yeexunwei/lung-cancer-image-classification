@@ -6,7 +6,6 @@ Created on Mon Oct  7 23:27:49 2019
 
 import numpy as np
 import pandas as pd
-import pickle
 import time
 
 # preprocessing
@@ -138,10 +137,10 @@ y = np.load(Y_LABEL)
 
 print("finding best classifier")
 
-features = FEATURES_ARRAY
+features = FEATURES_ARRAY2
 scores = {}
 
-# for feature in [OUTPUT_FOLDER + 'lh' + FORMAT]:  # features:
+# for feature in [OUTPUT_FOLDER + 'lbp2' + FORMAT]:  # features:
 for feature in features:
     print("""
     ----------------------------------
@@ -168,7 +167,7 @@ for feature in features:
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
-    score = accuracy_score(y_pred, y_test)
+    score = recall_score(y_pred, y_test)
     scores[feature] = score
 
     "Cross validate all models"
@@ -196,7 +195,7 @@ for feature in features:
     time_it()
     t0 = time.time()
 
-np.save('svm', scores)
+np.save('svm2_rec', scores)
 time_it()
 
 # "Hyperparam tuning"
