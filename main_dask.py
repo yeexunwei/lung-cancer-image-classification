@@ -47,18 +47,10 @@ RANDOM_STATE = 0
 
 classifier = DecisionTreeClassifier(random_state=RANDOM_STATE)
 classifiers = [
-    # ('NB', GaussianNB()),
-    # ('LSVC', LinearSVC()),
     ('SVC', SVC(random_state=RANDOM_STATE, gamma='scale')),
     ('LOGR', LogisticRegression(random_state=RANDOM_STATE, solver='lbfgs', max_iter=100)),
-    # ('SGD', SGDClassifier()),
-    # ('KNN', KNeighborsClassifier()),
     ('CART', DecisionTreeClassifier(criterion='gini', random_state=RANDOM_STATE)),
     ('RF', RandomForestClassifier(n_estimators=100, random_state=RANDOM_STATE)),
-    # ('ABC', AdaBoostClassifier()),
-    # ('XGB', xgb.XGBRegressor()),
-    # ('GBC', GradientBoostingClassifier()),
-    # ('LDA', LinearDiscriminantAnalysis()),
     ('MLP', MLPClassifier(hidden_layer_sizes=(100, ), activation='relu', random_state=RANDOM_STATE))
 ]
 

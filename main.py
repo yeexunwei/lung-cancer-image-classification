@@ -167,7 +167,7 @@ for feature in features:
     model.fit(X_train, y_train)
     y_pred = model.predict(X_test)
 
-    score = recall_score(y_pred, y_test)
+    score = accuracy_score(y_pred, y_test)
     scores[feature] = score
 
     "Cross validate all models"
@@ -195,7 +195,7 @@ for feature in features:
     time_it()
     t0 = time.time()
 
-np.save('svm2_rec', scores)
+np.save('svm2', scores)
 time_it()
 
 # "Hyperparam tuning"
