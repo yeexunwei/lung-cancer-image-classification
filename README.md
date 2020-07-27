@@ -26,7 +26,7 @@
 * `main.py` - train models
 * `Models Comparison.ipynb` - models comparison
 
-Data source from [cancerimagingarchive.net](https://wiki.cancerimagingarchive.net/display/Public/LIDC-IDRI). 1018 cases of labelled CT scans.
+Data source from [cancerimagingarchive.net](https://wiki.cancerimagingarchive.net/display/Public/LIDC-IDRI) consists of 1018 labelled CT scans cases.
 
 | ![dataset CT scan slices](assets/ct.png) | 
 |:--:| 
@@ -42,7 +42,7 @@ Data source from [cancerimagingarchive.net](https://wiki.cancerimagingarchive.ne
 
 | ![image wavelet transformation](assets/wavelet.png) | 
 |:--:| 
-| *One of image transformation, wavelet tranform* |
+| *One example of image transformations, wavelet tranform* |
 
 | ![process flow diagram](assets/process.png) | 
 |:--:| 
