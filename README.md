@@ -28,15 +28,25 @@
 
 Data source from [cancerimagingarchive.net](https://wiki.cancerimagingarchive.net/display/Public/LIDC-IDRI). 1018 cases of labelled CT scans.
 
-![dataset CT scan slices](assets/ct.png)
-*Dataset CT scan slices*
+| ![dataset CT scan slices](assets/ct.png) | 
+|:--:| 
+| *Dataset CT scan slices* |
 
-![flask app](assets/flask.png)
+| ![flask app](assets/flask.png) | 
+|:--:| 
+| *Screenshot of flask app* |
 
-Screenshot of flask app
+| ![accuracy score](assets/accuracy.png) | 
+|:--:| 
+| *Best accuracy obtained after 3rd wavelet transformation* |
 
-![xml](assets/accuracy.png)
+| ![image wavelet transformation](assets/wavelet.png) | 
+|:--:| 
+| *One of image transformation, wavelet tranform* |
 
+| ![process flow diagram](assets/process.png) | 
+|:--:| 
+| *Flow of data to classifiers* |
 
 ## Process Flow
 - frontend development
