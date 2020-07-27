@@ -31,6 +31,8 @@ Data source from [cancerimagingarchive.net](https://wiki.cancerimagingarchive.ne
 ![dataset CT scan slices](assets/ct.png)
 *Dataset CT scan slices*
 
+![dataset CT scan slices](assets/ct.png)*Dataset CT scan slices*
+
 | ![dataset CT scan slices](assets/ct.png) | 
 |:--:| 
 | *Dataset CT scan slices* |
