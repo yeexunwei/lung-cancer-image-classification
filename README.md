@@ -28,6 +28,9 @@
 
 Data source from [cancerimagingarchive.net](https://wiki.cancerimagingarchive.net/display/Public/LIDC-IDRI). 1018 cases of labelled CT scans.
 
+![dataset CT scan slices](assets/ct.png)
+*Dataset CT scan slices*
+
 | ![dataset CT scan slices](assets/ct.png) | 
 |:--:| 
 | *Dataset CT scan slices* |
