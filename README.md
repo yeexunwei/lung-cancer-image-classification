@@ -19,7 +19,7 @@ Lung cancer image classification in Python using LIDC dataset. Images are proces
 
 ## Project Description
 * `config.py` - global variables
-* `preporcessing.py` - preprocessing methods
+* `preprocessing.py` - preprocessing methods
 * `image_processing.py` - image transformations methods
 * `import_data.py` - read and convert raw data
 * `data_lidc.py` - generates features from LIDC dataset
