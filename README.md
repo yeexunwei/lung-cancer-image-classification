@@ -1,5 +1,5 @@
 # lung-cancer-image-classification
- Lung cancer image classification in Python using LIDC dataset. 
+Lung cancer image classification in Python using LIDC dataset. Images are processed using local feature descriptors and transformation methods before input into classifiers.
 
 ## Project Objective
 - To identify the best local feature extraction and image transformation method for lung cancer image classification
