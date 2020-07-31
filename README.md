@@ -2,13 +2,13 @@
  Lung cancer image classification in Python using LIDC dataset. 
 
 ## Project Objective
-- To identify the best local feature extraction method for lung cancer classification
+- To identify the best local feature extraction and image transformation method for lung cancer image classification
 - To develop a model for lung cancer classification
 - To develop a prototype of image classification tool to categorize malignant and benign lung nodules
 
 ### Methods Used
 * Image Transformation
-* Dimension Reduction
+* Dimensionality Reduction
 * Machine Learning
 
 ### Technologies
@@ -28,25 +28,29 @@
 
 Data source from [cancerimagingarchive.net](https://wiki.cancerimagingarchive.net/display/Public/LIDC-IDRI) consists of 1018 labelled CT scans cases.
 
-| ![dataset CT scan slices](assets/dicom.png) | 
+| ![CT scan slices](assets/dicom.png) | 
 |:--:| 
 | *Dataset CT scan slices.* |
 
-| ![flask app](assets/flask.png) | 
-|:--:| 
-| *Screenshot of flask app running.* |
+Data from dicom format is read into array.
 
-| ![accuracy score](assets/accuracy.png) | 
+| ![Process flow diagram](assets/process.png) | 
 |:--:| 
-| *Best accuracy obtained after 3rd wavelet transformation and LBP clustering* |
+| *Flow of data to classifiers.* |
 
-| ![image wavelet transformation](assets/wavelet.svg) | 
+K-means algorithm is used to group features extracted from images. Images transformed are directly fed into classiifers. A comparison is made for the each local feature descriptors and image transformation methods in the diagram.
+
+| ![Image after wavelet transformation](assets/wavelet.svg) | 
 |:--:| 
 | *One example of image transformations, wavelet tranform.* |
 
-| ![process flow diagram](assets/process.png) | 
+| ![Accuracy score](assets/accuracy.png) | 
 |:--:| 
-| *Flow of data to classifiers.* |
+| *Best accuracy obtained after 3rd wavelet transformation and LBP clustering* |
+
+| ![Flask app](assets/flask.png) | 
+|:--:| 
+| *Screenshot of flask app running.* |
 
 ## Process Flow
 - frontend development
